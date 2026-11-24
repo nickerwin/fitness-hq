@@ -6,8 +6,9 @@ import type { LoggedExercise, LoggedSet, WorkoutSession } from '../types'
 import { NavBar, Sheet } from '../components/ui'
 import { IconCheck, IconClock } from '../components/icons'
 import { fmtDate, fmtDuration } from '../lib/dates'
-import { sessionStats } from '../lib/training'
-import { useProgram } from '../hooks'
+import { nextTimePlan, sessionStats, type Suggestion } from '../lib/training'
+import { doneHistory } from '../lib/actions'
+import { useProgram, useSettings } from '../hooks'
 
 const numOrNull = (v: string) => (v.trim() === '' || isNaN(Number(v)) ? null : Number(v))
 
@@ -31,7 +32,9 @@ export default function Workout() {
   const sid = Number(id)
   const nav = useNavigate()
   const program = useProgram()
+  const settings = useSettings()
   const stored = useLiveQuery(() => db.sessions.get(sid), [sid])
+  const history = useLiveQuery(() => doneHistory(), [])
   // Local copy is the source of truth while logging so rapid taps never race the database.
   const [session, setSession] = useState<WorkoutSession | undefined>()
   useEffect(() => {
@@ -144,6 +147,7 @@ export default function Workout() {
     nav('/train', { replace: true })
   }
 
+  const next = program && history && stats.setsDone > 0 ? nextTimePlan(program, s, history, settings.useSubstitutes) : []
   const pct = stats.setsTotal ? stats.setsDone / stats.setsTotal : s.cardio?.done ? 1 : 0
 
   return (
@@ -206,6 +210,8 @@ export default function Workout() {
           />
         ))}
 
+        {isDone && next.length > 0 && <NextTime items={next} />}
+
         <div style={{ marginTop: 16 }}>
           <textarea className="note" placeholder="Session notes (how it felt, sleep, anything off)" defaultValue={s.notes} onBlur={(e) => save({ notes: e.target.value })} />
         </div>
@@ -264,6 +270,7 @@ export default function Workout() {
               </div>
             </div>
           </div>
+          {next.length > 0 && <NextTime items={next} />}
           {stats.setsDone < stats.setsTotal && <p className="footnote">{stats.setsTotal - stats.setsDone} sets aren't checked off. Only checked sets are saved to your history.</p>}
           <div className="stack" style={{ marginTop: 16 }}>
             <button className="btn train" onClick={finish}>
@@ -320,6 +327,12 @@ function ExerciseCard({
             Rest <b>{fmtDuration(ex.restSec * 1000)}</b>
           </span>
           {p.substitutions?.length ? <span>Alt: {p.substitutions.join(', ')}</span> : null}
+        </div>
+      )}
+      {ex.suggestReason && !disabled && (
+        <div className="coach">
+          <TrendPill trend={ex.suggestTrend} />
+          <span>{ex.suggestReason}</span>
         </div>
       )}
       {ex.notes && <div className="ex-note">{ex.notes}</div>}
@@ -443,6 +456,43 @@ function CardioCard({
         >
           <IconCheck />
         </button>
+      </div>
+    </div>
+  )
+}
+
+const TREND: Record<string, { label: string; cls: string }> = {
+  up: { label: '↑ Add weight', cls: 'up' },
+  hold: { label: '= Hold', cls: '' },
+  down: { label: '↓ Back off', cls: 'down' },
+  deload: { label: 'Deload', cls: 'deload' },
+  new: { label: 'New', cls: 'blue' },
+}
+
+export function TrendPill({ trend }: { trend?: string }) {
+  const t = TREND[trend ?? 'hold'] ?? TREND.hold
+  return <span className={`pill ${t.cls}`}>{t.label}</span>
+}
+
+function NextTime({ items }: { items: (Suggestion & { name: string })[] }) {
+  return (
+    <div style={{ marginTop: 16 }}>
+      <div className="section-title" style={{ marginTop: 0 }}>
+        <h2 style={{ fontSize: 17 }}>Next Time</h2>
+      </div>
+      <div className="list">
+        {items.map((n) => (
+          <div key={n.name} className="list-item" style={{ alignItems: 'flex-start' }}>
+            <div className="grow">
+              <div style={{ fontSize: 15, fontWeight: 600 }}>{n.name}</div>
+              <div className="sub">{n.reason}</div>
+            </div>
+            <div className="trail" style={{ flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+              <span className="num" style={{ color: 'var(--text)', fontWeight: 600 }}>{n.weight != null ? `${n.weight} lb` : '—'}</span>
+              <TrendPill trend={n.trend} />
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

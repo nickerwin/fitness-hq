@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react'
-import { db, exportAll, importAll, importProgram } from '../db'
+import { eraseLogs, exportAll, importAll, importProgram } from '../db'
 import { saveSettings, useProgram, useSettings } from '../hooks'
-import { NavBar, Section, useToast } from '../components/ui'
+import { NavBar, Row, Section, useToast } from '../components/ui'
+import { SyncStatusLine } from './CloudSync'
 import { fmtDate, mondayOf } from '../lib/dates'
 import type { Macros } from '../types'
 
@@ -106,9 +107,18 @@ export default function Settings() {
           />
         </Section>
 
+        <Section title="Sync & Health">
+          <div className="list">
+            <Row to="/sync" trail={<SyncStatusLine />}>
+              Cloud Sync
+            </Row>
+            <Row to="/health">Apple Health</Row>
+          </div>
+        </Section>
+
         <Section title="Your Data">
           <p className="footnote" style={{ padding: '0 4px 8px' }}>
-            Everything is saved on this iPhone, so it works offline at the gym. Back up now and then, until cloud sync is added.
+            Everything is saved on this iPhone first, so it works offline at the gym. Cloud Sync keeps a copy online. A backup file is a handy extra copy you can keep in Files.
           </p>
           <div className="stack">
             <button className="btn secondary" onClick={download}>
@@ -125,7 +135,7 @@ export default function Settings() {
               onChange={async (e) => {
                 const f = e.target.files?.[0]
                 if (!f) return
-                if (!window.confirm('Replace all data on this device with the backup?')) return
+                if (!window.confirm('Replace all data on this device with the backup? With cloud sync on, the backup becomes the latest version everywhere.')) return
                 try {
                   await importAll(await readJson(f))
                   show('Backup restored')
@@ -138,8 +148,8 @@ export default function Settings() {
             <button
               className="btn danger"
               onClick={async () => {
-                if (!window.confirm('Erase all workouts, food logs and measurements on this device?')) return
-                await Promise.all([db.sessions.clear(), db.food.clear(), db.measurements.clear(), db.grocery.clear(), db.weeks.clear()])
+                if (!window.confirm('Erase all workouts, food logs, measurements and check-ins? With cloud sync on, this erases them everywhere.')) return
+                await eraseLogs()
                 show('Data erased')
               }}
             >

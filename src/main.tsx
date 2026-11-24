@@ -3,11 +3,13 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App'
 import { db, ensureSeeded } from './db'
+import { startSync } from './lib/sync'
 
 async function boot() {
   await ensureSeeded()
   // Ask Safari to keep our IndexedDB data instead of evicting it under storage pressure.
   navigator.storage?.persist?.().catch(() => {})
+  startSync()
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <App />

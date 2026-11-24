@@ -7,6 +7,9 @@ import Workout from './screens/Workout'
 import Nutrition, { RecipeDetail } from './screens/Nutrition'
 import Progress from './screens/Progress'
 import Settings from './screens/Settings'
+import Checkin from './screens/Checkin'
+import CloudSync from './screens/CloudSync'
+import Health from './screens/Health'
 
 function ScrollTop() {
   const { pathname } = useLocation()
@@ -31,6 +34,10 @@ export default function App() {
           <Route path="/recipe/:id" element={<RecipeDetail />} />
           <Route path="/progress" element={<Progress />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/checkin" element={<Checkin />} />
+          <Route path="/checkin/:week" element={<Checkin />} />
+          <Route path="/sync" element={<CloudSync />} />
+          <Route path="/health" element={<Health />} />
           <Route path="*" element={<Summary />} />
         </Routes>
       </div>
