@@ -8,6 +8,7 @@ A personal strength and nutrition app built for iPhone. It installs to the home 
 - **Weekly check-in**: weight trend, waist, adherence (training, nutrition, steps), energy, sleep and hunger, with trend charts and the program's 2-week calorie rule (one tap to apply).
 - **Auto progression**: each exercise shows today's suggested weight and why. Double progression, hold when grinding past the target RIR, back off ~7.5% after two sessions under the range, deload-aware, and a "Next time" summary when you finish.
 - **Cloud sync**: optional, through your own free Supabase project (`supabase/setup.sql`). Offline-first, last-write-wins per record, deletes sync too.
+- **Coach access**: Cloud Sync → Coach Access makes a read-only, revocable key. `python3 scripts/coach_pull.py --creds <file>` pulls the data and prints a coaching summary.
 - **Apple Health**: an iPhone Shortcut sends weight and steps to the cloud inbox (or via clipboard or a `#/health?date=&weight=&steps=` link). Setup steps are in the app under Settings → Apple Health.
 
 ## Stack

@@ -72,3 +72,34 @@ begin
 end $$;
 revoke all on function public.fhq_health_ingest(text, text, text, text) from public;
 grant execute on function public.fhq_health_ingest(text, text, text, text) to anon, authenticated;
+
+-- 3) Coach access: a read-only key you can share with your coach (Claude) and revoke any time.
+--    It can only read this account's synced records. It cannot write, delete or sign in.
+create table if not exists public.fhq_coach_tokens (
+  token text primary key,
+  user_id uuid not null default auth.uid() references auth.users on delete cascade,
+  created_at timestamptz not null default now()
+);
+alter table public.fhq_coach_tokens enable row level security;
+drop policy if exists "own coach tokens" on public.fhq_coach_tokens;
+create policy "own coach tokens" on public.fhq_coach_tokens for all to authenticated
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
+grant select, insert, delete on public.fhq_coach_tokens to authenticated;
+
+create or replace function public.fhq_coach_read(token text, since timestamptz default '1970-01-01')
+returns table (tbl text, key text, data jsonb, deleted boolean, mt bigint, server_ts timestamptz)
+language plpgsql stable security definer set search_path = public as $$
+declare uid uuid;
+begin
+  select t.user_id into uid from public.fhq_coach_tokens t where t.token = fhq_coach_read.token;
+  if uid is null then
+    raise exception 'Unknown or revoked coach key';
+  end if;
+  return query
+    select r.tbl, r.key, r.data, r.deleted, r.mt, r.server_ts
+    from public.fhq_records r
+    where r.user_id = uid and r.server_ts >= since
+    order by r.server_ts;
+end $$;
+revoke all on function public.fhq_coach_read(text, timestamptz) from public;
+grant execute on function public.fhq_coach_read(text, timestamptz) to anon, authenticated;

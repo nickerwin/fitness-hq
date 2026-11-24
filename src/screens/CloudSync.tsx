@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { NavBar, Section, useToast } from '../components/ui'
-import { getConfig, saveConfig, signIn, signOut, signUp, syncNow, refreshSyncState, useSync } from '../lib/sync'
+import { createCoachToken, getConfig, revokeCoachTokens, saveConfig, signIn, signOut, signUp, syncNow, refreshSyncState, useSync } from '../lib/sync'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { db } from '../db'
 import setupSql from '../../supabase/setup.sql?raw'
 
 export async function copy(text: string, show: (m: string) => void, label = 'Copied') {
@@ -46,6 +48,7 @@ export default function CloudSync() {
   const [busy, setBusy] = useState(false)
   const [editing, setEditing] = useState(!cfg)
   const signedIn = s.status !== 'off'
+  const coachToken = useLiveQuery(async () => ((await db.meta.get('coach.token'))?.value as string | undefined) ?? '', [])
 
   const run = async (fn: () => Promise<unknown>) => {
     setBusy(true)
@@ -98,6 +101,40 @@ export default function CloudSync() {
             </div>
           )}
         </div>
+
+        {signedIn && cfg && (
+          <Section title="Coach Access">
+            <div className="card">
+              <div className="footnote" style={{ fontSize: 14 }}>
+                A read-only key that lets your coach (Claude) read your synced workouts, food, weight and check-ins. It can't change or delete anything, and you can revoke it any time.
+              </div>
+              {coachToken ? (
+                <>
+                  <div className="copy-row" style={{ marginTop: 10 }}>
+                    <span className="code">{coachToken}</span>
+                  </div>
+                  <div className="stack" style={{ marginTop: 10 }}>
+                    <button className="btn" onClick={() => copy(`Fitness HQ coach access\nURL: ${cfg.url}\nKey: ${cfg.key}\nCoach key: ${coachToken}`, show, 'Copied. Paste it to Claude')}>
+                      Copy for Claude
+                    </button>
+                    <button
+                      className="btn danger"
+                      disabled={busy}
+                      onClick={() => window.confirm('Revoke coach access? Claude will no longer be able to read your data.') && run(async () => { await revokeCoachTokens(); show('Coach access revoked') })}
+                    >
+                      Revoke Coach Access
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <button className="btn secondary" style={{ marginTop: 10 }} disabled={busy} onClick={() => run(createCoachToken)}>
+                  Create Coach Key
+                </button>
+              )}
+              <p className="footnote" style={{ marginTop: 8 }}>If this says the key is unknown, copy the setup script again and run it once more in Supabase. It adds coach access.</p>
+            </div>
+          </Section>
+        )}
 
         {!signedIn && (
           <>
