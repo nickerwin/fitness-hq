@@ -131,7 +131,10 @@ export default function CloudSync() {
                   Create Coach Key
                 </button>
               )}
-              <p className="footnote" style={{ marginTop: 8 }}>If this says the key is unknown, copy the setup script again and run it once more in Supabase. It adds coach access.</p>
+              <p className="footnote" style={{ marginTop: 8 }}>If creating the key fails, run the setup script once more in Supabase's SQL Editor. It adds coach access and leaves your data alone.</p>
+              <button className="btn small secondary" style={{ marginTop: 8 }} onClick={() => copy(setupSql, show, 'Setup script copied')}>
+                Copy Setup Script
+              </button>
             </div>
           </Section>
         )}
