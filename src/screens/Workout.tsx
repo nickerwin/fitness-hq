@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db'
 import type { LoggedExercise, LoggedSet, WorkoutSession } from '../types'
 import { NavBar, Sheet } from '../components/ui'
+import { CoachCard } from '../components/CoachCard'
 import { IconCheck, IconClock } from '../components/icons'
 import { fmtDate, fmtDuration } from '../lib/dates'
 import { nextTimePlan, sessionStats, type Suggestion } from '../lib/training'
@@ -35,6 +36,7 @@ export default function Workout() {
   const settings = useSettings()
   const stored = useLiveQuery(() => db.sessions.get(sid), [sid])
   const history = useLiveQuery(() => doneHistory(), [])
+  const coachNote = useLiveQuery(async () => (stored?.uid ? db.coach.get(`summary:${stored.uid}`) : undefined), [stored?.uid])
   // Local copy is the source of truth while logging so rapid taps never race the database.
   const [session, setSession] = useState<WorkoutSession | undefined>()
   useEffect(() => {
@@ -210,6 +212,7 @@ export default function Workout() {
           />
         ))}
 
+        {isDone && coachNote && <CoachCard rec={coachNote} style={{ marginTop: 12 }} />}
         {isDone && next.length > 0 && <NextTime items={next} />}
 
         <div style={{ marginTop: 16 }}>

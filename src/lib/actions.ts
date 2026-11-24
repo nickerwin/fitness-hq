@@ -12,6 +12,7 @@ export async function startWorkout(program: Program, day: ProgramDay, date: stri
   if (existing?.id != null) return existing.id
   const history = await doneHistory()
   const week = programWeek(settings.programStart, date)
-  const s = buildSession(program, day, date, week, history, settings.useSubstitutes)
+  const coach = new Map((await db.coach.toArray()).map((c) => [c.key, c]))
+  const s = buildSession(program, day, date, week, history, settings.useSubstitutes, coach)
   return db.sessions.add(s)
 }

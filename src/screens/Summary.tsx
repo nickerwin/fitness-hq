@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db'
 import { useProgram, useSettings } from '../hooks'
 import { LargeTitle, useToast } from '../components/ui'
+import { CoachCard } from '../components/CoachCard'
 import { IconChevron, IconDumbbell, IconFeet, IconFork, IconGear, IconScale } from '../components/icons'
 import { addDays, fmtDate, isoWeekday, mondayOf, ymd } from '../lib/dates'
 import { dayFor, programWeek, stepTarget, weekPlanFor } from '../lib/training'
@@ -25,6 +26,11 @@ export default function Summary() {
   const entries = useLiveQuery(() => db.food.where('date').equals(today).toArray(), [today]) ?? []
   const measures = useLiveQuery(() => db.measurements.where('date').aboveOrEqual(addDays(today, -30)).sortBy('date'), [today]) ?? []
   const week = usePlannedWeek(mondayOf(today))
+  // The latest post-workout note from the coach, shown for 3 days.
+  const coachNote = useLiveQuery(
+    async () => (await db.coach.toArray()).filter((c) => c.key.startsWith('summary:') && c.setAt >= new Date(Date.now() - 3 * 86400000).toISOString()).sort((a, b) => b.setAt.localeCompare(a.setAt))[0],
+    [],
+  )
   const plannedToday = week.days[isoWeekday(today) - 1]
 
   if (!program) return null
@@ -64,6 +70,8 @@ export default function Summary() {
           {plan.deload ? ' · Deload week' : ''}
         </div>
       )}
+
+      {coachNote && <CoachCard rec={coachNote} style={{ marginBottom: 8 }} />}
 
       {/* Workout */}
       {day && (

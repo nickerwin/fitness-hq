@@ -226,3 +226,27 @@ export interface Checkin extends SyncFields {
   notes?: string
   completedAt?: string
 }
+
+// ---------- Coach ----------
+
+/**
+ * Written by the coach (Claude) through the coach key, synced like everything else.
+ * key "override:<exercise>"  → next session's weight for that exercise
+ * key "summary:<session uid>" → post-workout analysis
+ * key "targets"               → new daily calorie/macro targets
+ */
+export interface CoachRecord extends SyncFields {
+  key: string
+  setAt: string
+  exercise?: string
+  weight?: number | null
+  reps?: number | null
+  note?: string
+  sessionUid?: string
+  title?: string
+  body?: string
+  kcal?: number
+  protein?: number
+  carbs?: number
+  fat?: number
+}

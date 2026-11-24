@@ -103,3 +103,30 @@ begin
 end $$;
 revoke all on function public.fhq_coach_read(text, timestamptz) from public;
 grant execute on function public.fhq_coach_read(text, timestamptz) to anon, authenticated;
+
+-- 4) Coach notes: the coach key can also write post-workout notes, next-session weights and
+--    new calorie targets. It can only write records of type 'coach', never your logs.
+create or replace function public.fhq_coach_write(token text, key text, data jsonb)
+returns text language plpgsql security definer set search_path = public as $$
+declare uid uuid; k text; d jsonb;
+begin
+  select t.user_id into uid from public.fhq_coach_tokens t where t.token = fhq_coach_write.token;
+  if uid is null then
+    raise exception 'Unknown or revoked coach key';
+  end if;
+  k := fhq_coach_write.key;
+  d := fhq_coach_write.data;
+  if k is null or length(k) > 200 or not (k like 'override:%' or k like 'summary:%' or k = 'targets') then
+    raise exception 'Coach can only write override:*, summary:* or targets';
+  end if;
+  if pg_column_size(d) > 20000 then
+    raise exception 'Coach note too large';
+  end if;
+  insert into public.fhq_records as r (user_id, tbl, key, data, deleted, mt)
+  values (uid, 'coach', k, d || jsonb_build_object('key', k), d is null, (extract(epoch from clock_timestamp()) * 1000)::bigint)
+  on conflict on constraint fhq_records_pkey do update
+    set data = excluded.data, deleted = excluded.deleted, mt = excluded.mt;
+  return 'ok';
+end $$;
+revoke all on function public.fhq_coach_write(text, text, jsonb) from public;
+grant execute on function public.fhq_coach_write(text, text, jsonb) to anon, authenticated;

@@ -108,9 +108,11 @@ def summarize(data, days):
 
     # Training
     sessions = sorted([s for s in data.get("sessions", []) if s.get("status") == "done" and d(s["date"]) >= since], key=lambda s: s["date"])
+    coach = {c["key"]: c for c in data.get("coach", [])}
     lines.append(f"\n## Training (last {days} days: {len(sessions)} sessions)")
     for s in sessions:
-        lines.append(f"- {s['date']} {s['name']} (wk {s.get('week')})" + (f" — notes: {s['notes']}" if s.get("notes") else ""))
+        done = "coach note ✓" if f"summary:{s.get('uid')}" in coach else "NO coach note yet"
+        lines.append(f"- {s['date']} {s['name']} (wk {s.get('week')}, uid {s.get('uid')}, {done})" + (f" — notes: {s['notes']}" if s.get("notes") else ""))
         for e in s.get("exercises", []):
             sets = [x for x in e.get("sets", []) if x.get("done") and x.get("type") == "N"]
             if not sets:
@@ -135,6 +137,16 @@ def summarize(data, days):
         k, p, n = by_day[day]
         lines.append(f"- {day}: {round(k)} kcal, {round(p)} g protein ({n} entries)")
 
+    # Coach state
+    ovs = [c for k, c in coach.items() if k.startswith("override:")]
+    if ovs or "targets" in coach:
+        lines.append("\n## Coach changes on file")
+        for c in sorted(ovs, key=lambda c: c["key"]):
+            lines.append(f"- {c.get('exercise')}: {c.get('weight')} lb" + (f" × {c['reps']}" if c.get("reps") else "") + f" (set {c.get('setAt', '')[:10]}) {c.get('note', '')}")
+        if "targets" in coach:
+            t2 = coach["targets"]
+            lines.append(f"- Targets: {t2.get('kcal')} kcal (set {t2.get('setAt', '')[:10]}) {t2.get('note', '')}")
+
     # Check-ins
     cks = sorted(data.get("checkins", []), key=lambda c: c["weekStart"])[-4:]
     lines.append("\n## Weekly check-ins")
@@ -149,9 +161,17 @@ def main():
     ap.add_argument("--creds", default="/mnt/project-files/coach/access.json")
     ap.add_argument("--days", type=int, default=21)
     ap.add_argument("--out", help="also write the full deduplicated data as JSON here")
+    ap.add_argument("--new", action="store_true", help="only list finished workouts from the last 3 days that have no coach note yet (one uid per line); prints nothing if none")
     a = ap.parse_args()
     url, key, tok = load_creds(a.creds if os.path.exists(a.creds) else None)
     data = latest_by_key(fetch_all(url, key, tok))
+    if a.new:
+        have = {c["key"] for c in data.get("coach", [])}
+        cutoff = (dt.date.today() - dt.timedelta(days=3)).isoformat()
+        for s in sorted(data.get("sessions", []), key=lambda s: s.get("startedAt", "")):
+            if s.get("status") == "done" and s.get("date", "") >= cutoff and f"summary:{s.get('uid')}" not in have:
+                print(s["uid"], s["date"], s["name"])
+        return
     if a.out:
         with open(a.out, "w") as f:
             json.dump(data, f, indent=1)
