@@ -365,6 +365,28 @@ export async function createHealthToken(): Promise<string> {
   return t
 }
 
+function randomToken() {
+  const bytes = new Uint8Array(24)
+  crypto.getRandomValues(bytes)
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
+}
+
+/** Coach key: read-only access to this account's synced records, for sharing with a coach. */
+export async function createCoachToken(): Promise<string> {
+  const { token: tok, userId } = await token()
+  const t = 'coach_' + randomToken()
+  await http('/rest/v1/fhq_coach_tokens', { method: 'POST', token: tok, headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ token: t, user_id: userId }) })
+  await db.meta.put({ key: 'coach.token', value: t })
+  return t
+}
+
+/** Revoke every coach key on the account. */
+export async function revokeCoachTokens() {
+  const { token: tok, userId } = await token()
+  await http(`/rest/v1/fhq_coach_tokens?user_id=eq.${userId}`, { method: 'DELETE', token: tok, headers: { Prefer: 'return=minimal' } })
+  await db.meta.delete('coach.token')
+}
+
 export function startSync() {
   setLocalChangeListener(() => scheduleSync())
   setState({ lastSync: readLS<number>('fhq.sync.last') ?? undefined })
