@@ -1,4 +1,16 @@
+// ---------- Sync ----------
+
+/** Fields every synced record carries. */
+export interface SyncFields {
+  /** Stable id shared across devices (tables with auto-increment ids). */
+  uid?: string
+  /** Last modified, ms since epoch. */
+  _mt?: number
+}
+
 // ---------- Training ----------
+
+export type SuggestTrend = 'up' | 'hold' | 'down' | 'deload' | 'new'
 
 export type DayKind = 'strength' | 'cardio' | 'optional-cardio' | 'rest'
 
@@ -67,7 +79,7 @@ export interface Program {
   days: ProgramDay[]
 }
 
-export interface StoredProgram extends Program {
+export interface StoredProgram extends Program, SyncFields {
   id?: number
   importedAt: string
   active: 0 | 1
@@ -93,6 +105,10 @@ export interface LoggedSet {
 
 export interface LoggedExercise {
   name: string
+  /** Why the app suggested today's weight (auto progression) */
+  suggestReason?: string
+  /** 'up' | 'hold' | 'down' | 'deload' | 'new' */
+  suggestTrend?: SuggestTrend
   restSec: number
   supersetGroup?: string | null
   targetRir?: number
@@ -101,7 +117,7 @@ export interface LoggedExercise {
   sets: LoggedSet[]
 }
 
-export interface WorkoutSession {
+export interface WorkoutSession extends SyncFields {
   id?: number
   dayKey: string
   name: string
@@ -157,12 +173,12 @@ export interface Recipe extends Macros {
 }
 
 /** A planned week: weekStart (Monday YYYY-MM-DD) -> 7 days x 4 slots of recipe ids */
-export interface PlannedWeek {
+export interface PlannedWeek extends SyncFields {
   weekStart: string
   days: Record<Slot, string>[]
 }
 
-export interface FoodEntry extends Macros {
+export interface FoodEntry extends Macros, SyncFields {
   id?: number
   date: string
   slot: Slot | 'other'
@@ -172,14 +188,14 @@ export interface FoodEntry extends Macros {
   createdAt: string
 }
 
-export interface GroceryCheck {
+export interface GroceryCheck extends SyncFields {
   key: string // `${weekStart}|${item}|${unit}`
   checked: boolean
 }
 
 // ---------- Body ----------
 
-export interface Measurement {
+export interface Measurement extends SyncFields {
   id?: number
   date: string
   weight?: number | null
@@ -188,10 +204,25 @@ export interface Measurement {
   note?: string
 }
 
-export interface Settings {
+export interface Settings extends SyncFields {
   key: 'settings'
   targets: Macros
   /** Monday (YYYY-MM-DD) of program week 1 */
   programStart: string
   useSubstitutes: boolean
+}
+
+// ---------- Weekly check-in ----------
+
+export interface Checkin extends SyncFields {
+  /** Monday (YYYY-MM-DD) of the week being reviewed */
+  weekStart: string
+  /** 1 (bad) … 5 (great) */
+  energy?: number | null
+  sleep?: number | null
+  hunger?: number | null
+  sleepHours?: number | null
+  photos?: boolean
+  notes?: string
+  completedAt?: string
 }

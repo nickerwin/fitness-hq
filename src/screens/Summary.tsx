@@ -11,7 +11,7 @@ import { startWorkout } from '../lib/actions'
 import { entryMacros, sumMacros } from '../lib/nutrition'
 import { RECIPE_BY_ID, SLOT_LABEL, SLOTS } from '../data/recipes'
 import { MacroCard, logRecipe, usePlannedWeek } from './Nutrition'
-import { LogBodySheet, rollingAvg } from './Progress'
+import { CheckinCard, LogBodySheet, rollingAvg } from './Progress'
 import { dayLabel } from './Train'
 
 export default function Summary() {
@@ -145,6 +145,7 @@ export default function Summary() {
           <div className="footnote num">{stepGoal ? `Goal ${stepGoal.toLocaleString()}` : 'Tap to log'}</div>
         </button>
       </div>
+      {[6, 7, 1].includes(isoWeekday(today)) && <CheckinCard />}
       {logging && <LogBodySheet onClose={() => setLogging(false)} onSaved={() => show('Saved')} />}
       {toast}
     </div>

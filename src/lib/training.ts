@@ -1,4 +1,5 @@
 import type {
+  SuggestTrend,
   ExercisePrescription,
   LoggedExercise,
   LoggedSet,
@@ -59,36 +60,103 @@ function workingSets(ex: LoggedExercise) {
 
 /** Most recent completed session containing this exercise (by name). */
 export function lastPerformance(history: WorkoutSession[], name: string): LoggedExercise | undefined {
-  for (const s of history) {
-    const e = s.exercises.find((x) => x.name === name && x.sets.some((y) => y.done && y.type === 'N'))
-    if (e) return e
-  }
-  return undefined
+  return recentPerformances(history, name, 1)[0]
 }
 
+const hasWork = (e: LoggedExercise) => e.sets.some((y) => y.done && y.type === 'N' && y.weight != null)
+
+/** Completed performances of an exercise, newest first. With a program, deload-week sessions are skipped. */
+export function recentPerformances(history: WorkoutSession[], name: string, n: number, program?: Program): LoggedExercise[] {
+  const out: LoggedExercise[] = []
+  for (const s of history) {
+    if (program && s.week != null && weekPlanFor(program, s.week).deload) continue
+    const e = s.exercises.find((x) => x.name === name && hasWork(x))
+    if (e) out.push(e)
+    if (out.length >= n) break
+  }
+  return out
+}
+
+export interface Suggestion {
+  weight: number | null
+  reason: string
+  trend: SuggestTrend
+}
+
+/** Heaviest dumbbell in the apartment gym. */
+export const APARTMENT_MAX_DB = 75
+
 /**
- * Double progression: hold weight until every working set hits the top of the
- * rep range, then add the standard increment.
+ * Auto progression, following the program's rules:
+ * - Double progression: hold the weight and add reps until every working set reaches
+ *   the top of the range at the target RIR, then add the standard increment.
+ * - Hitting the reps while grinding well past the target RIR: hold.
+ * - Below the bottom of the range two sessions in a row: drop about 7.5% and rebuild.
+ * - Deload weeks: about 90% of the last normal week, and deload sessions never become the base.
+ * `recent` is newest first and should exclude deload sessions.
  */
-export function suggestWeight(
-  ex: ExercisePrescription,
-  name: string,
-  last: LoggedExercise | undefined,
-  plan: WeekPlan,
-): { weight: number | null; reason: string } {
-  const base = last ? workingSets(last).filter((s) => s.done && s.weight != null) : []
+export function suggestNext(ex: ExercisePrescription, name: string, recent: LoggedExercise[], plan: WeekPlan, opts: { maxDumbbell?: number } = {}): Suggestion {
+  const base = recent[0] ? workingSets(recent[0]).filter((s) => s.done && s.weight != null) : []
   if (!base.length) {
-    if (ex.startWeight == null) return { weight: null, reason: 'Calibrate: pick a weight that hits the bottom of the range' }
+    if (ex.startWeight == null) return { weight: null, reason: 'First time: pick a weight that hits the bottom of the range', trend: 'new' }
     const w = plan.deload ? round5(ex.startWeight * plan.loadMultiplier) : ex.startWeight
-    return { weight: w, reason: ex.startWeightIsEstimate ? 'Starting estimate, adjust after set 1' : 'Program start weight' }
+    return { weight: w, reason: ex.startWeightIsEstimate ? 'Starting estimate: adjust after set 1' : 'Program start weight', trend: 'new' }
   }
   const top = Math.max(...base.map((s) => s.weight ?? 0))
   const topSets = base.filter((s) => s.weight === top)
-  const hitTop = topSets.length >= Math.min(ex.sets, base.length) && topSets.every((s) => (s.reps ?? 0) >= ex.repsMax)
-  if (plan.deload) return { weight: round5(top * plan.loadMultiplier), reason: `Deload: ~${Math.round(plan.loadMultiplier * 100)}% of last` }
-  if (hitTop && name === ex.name) return { weight: top + increment(ex), reason: `Hit ${ex.repsMax} on all sets last time: +${increment(ex)} lb` }
-  if (hitTop) return { weight: top + increment({ name, equipment: ex.equipment }), reason: 'Hit the top of the range: add weight' }
-  return { weight: top, reason: 'Same weight, beat last reps' }
+  const inc = name === ex.name ? increment(ex) : increment({ name, equipment: ex.equipment })
+  if (plan.deload) return { weight: round5(top * plan.loadMultiplier), reason: `Deload week: about ${Math.round(plan.loadMultiplier * 100)}% of ${top} lb`, trend: 'deload' }
+
+  // Two sessions in a row below the range at the same top weight: back off and rebuild.
+  const missed = (e: LoggedExercise | undefined) => {
+    if (!e) return false
+    const ws = workingSets(e).filter((s) => s.done && s.weight != null)
+    const t = Math.max(...ws.map((s) => s.weight ?? 0))
+    return t === top && ws.some((s) => s.weight === t && (s.reps ?? 0) < ex.repsMin)
+  }
+  if (missed(recent[0]) && missed(recent[1])) {
+    const step = ex.equipment === 'dumbbell' || ex.equipment === 'kettlebell' ? 5 : inc
+    const down = Math.max(step, Math.min(top - step, Math.round((top * 0.925) / step) * step))
+    return { weight: down, reason: `Under ${ex.repsMin} reps two sessions running: drop to ${down} lb and rebuild`, trend: 'down' }
+  }
+
+  const hitTop = topSets.length >= ex.sets && topSets.every((s) => (s.reps ?? 0) >= ex.repsMax)
+  const target = recent[0].targetRir
+  const grinding = target != null && topSets.some((s) => s.rir != null && s.rir < target - 1)
+  if (hitTop && grinding) return { weight: top, reason: `Hit ${ex.repsMax} reps but below RIR ${target}: hold ${top} lb and own it`, trend: 'hold' }
+  if (hitTop) {
+    const next = top + inc
+    if (opts.maxDumbbell && ex.equipment === 'dumbbell' && next > opts.maxDumbbell)
+      return { weight: top, reason: `${top} lb is the heaviest dumbbell here: add a rep or slow the lowering`, trend: 'hold' }
+    return { weight: next, reason: `Hit ${ex.repsMax} reps on every set: +${inc} lb`, trend: 'up' }
+  }
+  const best = topSets.reduce((a, b) => ((b.reps ?? 0) > (a.reps ?? 0) ? b : a))
+  return { weight: top, reason: `Same weight: beat ${top} × ${best.reps ?? 0}`, trend: 'hold' }
+}
+
+/** Back-compat wrapper used by older callers. */
+export function suggestWeight(ex: ExercisePrescription, name: string, last: LoggedExercise | undefined, plan: WeekPlan) {
+  return suggestNext(ex, name, last ? [last] : [], plan)
+}
+
+/** Per-set rep targets: one more rep than last time at the same weight, or the bottom of the range after a jump. */
+export function suggestRepsFor(ex: ExercisePrescription, weight: number | null, prev: LoggedSet | undefined): number {
+  if (prev?.reps != null && prev.weight === weight) return Math.min(Math.max(prev.reps + 1, ex.repsMin), ex.repsMax)
+  return ex.repsMin
+}
+
+/** What the next session of each exercise in a finished workout should look like. */
+export function nextTimePlan(program: Program, session: WorkoutSession, history: WorkoutSession[], useSubstitutes: boolean) {
+  const nextWeek = (session.week ?? 1) + 1
+  const plan = weekPlanFor(program, nextWeek)
+  const others = history.filter((h) => h.id !== session.id)
+  const curDeload = session.week != null && weekPlanFor(program, session.week).deload
+  return session.exercises
+    .filter((e) => e.prescription && hasWork(e))
+    .map((e) => {
+      const recent = [...(curDeload ? [] : [e]), ...recentPerformances(others, e.name, 2, program)].slice(0, 2)
+      return { name: e.name, ...suggestNext(e.prescription!, e.name, recent, plan, { maxDumbbell: useSubstitutes ? undefined : APARTMENT_MAX_DB }) }
+    })
 }
 
 export function buildSession(
@@ -103,10 +171,14 @@ export function buildSession(
   const exercises: LoggedExercise[] = day.exercises.map((ex) => {
     const name = exerciseName(ex, useSubstitutes)
     const last = lastPerformance(history, name)
-    const { weight } = suggestWeight(ex, name, last, plan)
+    const recent = recentPerformances(history, name, 2, program)
+    const sug = suggestNext(ex, name, recent, plan, { maxDumbbell: useSubstitutes ? undefined : APARTMENT_MAX_DB })
+    const weight = sug.weight
     const nSets = Math.max(1, Math.ceil(ex.sets * plan.setsMultiplier))
     const targetRir = ex.compound ? plan.rirCompound : plan.rirIsolation
-    const lastWorking = last ? workingSets(last) : []
+    // After a deload, compare against the last normal week, not the lighter deload numbers.
+    const repBase = plan.deload ? last : (recent[0] ?? last)
+    const lastWorking = repBase ? workingSets(repBase) : []
     const sets: LoggedSet[] = []
     const warm = ex.warmupSets ?? 0
     const warmPct = warm === 1 ? [0.6] : warm === 2 ? [0.5, 0.75] : Array.from({ length: warm }, (_, k) => 0.4 + (0.45 * k) / Math.max(1, warm - 1))
@@ -131,13 +203,15 @@ export function buildSession(
         rir: null,
         done: false,
         suggestWeight: weight,
-        suggestReps: prev?.reps != null && prev.weight === weight ? Math.min(prev.reps + 1, ex.repsMax) : ex.repsMin,
+        suggestReps: suggestRepsFor(ex, weight, prev),
         prevWeight: prev?.weight ?? null,
         prevReps: prev?.reps ?? null,
       })
     }
     return {
       name,
+      suggestReason: sug.reason,
+      suggestTrend: sug.trend,
       restSec: ex.restSec,
       supersetGroup: ex.supersetGroup ?? null,
       targetRir,

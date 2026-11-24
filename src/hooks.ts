@@ -7,7 +7,8 @@ export function useSettings(): Settings {
 }
 
 export function useProgram(): StoredProgram | undefined {
-  return useLiveQuery(() => db.programs.where('active').equals(1).first(), [])
+  // If two devices each activated a program, the most recently imported one wins.
+  return useLiveQuery(async () => (await db.programs.where('active').equals(1).toArray()).sort((a, b) => b.importedAt.localeCompare(a.importedAt))[0], [])
 }
 
 export async function saveSettings(patch: Partial<Settings>) {

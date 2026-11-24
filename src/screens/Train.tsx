@@ -5,9 +5,10 @@ import { useProgram, useSettings } from '../hooks'
 import { LargeTitle, NavBar, Row, Section } from '../components/ui'
 import { LineChart } from '../components/LineChart'
 import { addDays, fmtDate, mondayOf, WEEKDAY_LONG, WEEKDAY_SHORT, ymd } from '../lib/dates'
-import { bestSet, dayFor, e1rm, exerciseName, programWeek, sessionStats, weekPlanFor } from '../lib/training'
-import { startWorkout } from '../lib/actions'
-import type { ProgramDay, WorkoutSession } from '../types'
+import { APARTMENT_MAX_DB, bestSet, dayFor, e1rm, exerciseName, programWeek, recentPerformances, sessionStats, suggestNext, weekPlanFor } from '../lib/training'
+import { doneHistory, startWorkout } from '../lib/actions'
+import type { ExercisePrescription, ProgramDay, WorkoutSession } from '../types'
+import { TrendPill } from './Workout'
 
 const kindColor: Record<string, string> = {
   strength: 'var(--train)',
@@ -175,11 +176,16 @@ export function DayPreview() {
   const program = useProgram()
   const settings = useSettings()
   const nav = useNavigate()
+  const history = useLiveQuery(() => doneHistory(), [])
   if (!program) return null
   const d = program.days.find((x) => x.key === key)
   if (!d) return <NavBar title="Not found" />
   const week = programWeek(settings.programStart, ymd())
   const plan = weekPlanFor(program, week)
+  const sugFor = (ex: ExercisePrescription) => {
+    const name = exerciseName(ex, settings.useSubstitutes)
+    return suggestNext(ex, name, recentPerformances(history ?? [], name, 2, program), plan, { maxDumbbell: settings.useSubstitutes ? undefined : APARTMENT_MAX_DB })
+  }
   const start = async () => {
     const id = await startWorkout(program, d, ymd(), settings)
     nav(`/workout/${id}`, { replace: true })
@@ -204,8 +210,21 @@ export function DayPreview() {
             <div className="list">
               {d.exercises.map((ex) => {
                 const sets = Math.max(1, Math.ceil(ex.sets * plan.setsMultiplier))
+                const sug = sugFor(ex)
                 return (
-                  <Row key={ex.name} to={`/exercise/${encodeURIComponent(exerciseName(ex, settings.useSubstitutes))}`} trail={<span className="num">{sets} × {ex.repsMin === ex.repsMax ? ex.repsMin : `${ex.repsMin}–${ex.repsMax}`}</span>}>
+                  <Row
+                    key={ex.name}
+                    to={`/exercise/${encodeURIComponent(exerciseName(ex, settings.useSubstitutes))}`}
+                    trail={
+                      <span className="num" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+                        <span>
+                          {sug.weight != null ? `${sug.weight} lb · ` : ''}
+                          {sets} × {ex.repsMin === ex.repsMax ? ex.repsMin : `${ex.repsMin}–${ex.repsMax}`}
+                        </span>
+                        <TrendPill trend={sug.trend} />
+                      </span>
+                    }
+                  >
                     <div>{exerciseName(ex, settings.useSubstitutes)}</div>
                     <div className="sub num">
                       {ex.muscle} · rest {Math.round(ex.restSec / 60 * 10) / 10} min · RIR {ex.compound ? plan.rirCompound : plan.rirIsolation}
