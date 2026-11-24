@@ -1,0 +1,155 @@
+import { useRef, useState } from 'react'
+import { db, exportAll, importAll, importProgram } from '../db'
+import { saveSettings, useProgram, useSettings } from '../hooks'
+import { NavBar, Section, useToast } from '../components/ui'
+import { fmtDate, mondayOf } from '../lib/dates'
+import type { Macros } from '../types'
+
+export default function Settings() {
+  const settings = useSettings()
+  const program = useProgram()
+  const [toast, show] = useToast()
+  const progFile = useRef<HTMLInputElement>(null)
+  const backupFile = useRef<HTMLInputElement>(null)
+  const [t, setT] = useState<Record<keyof Macros, string> | null>(null)
+  const targets = t ?? {
+    kcal: String(settings.targets.kcal),
+    protein: String(settings.targets.protein),
+    carbs: String(settings.targets.carbs),
+    fat: String(settings.targets.fat),
+  }
+  const saveTargets = async () => {
+    await saveSettings({ targets: { kcal: +targets.kcal, protein: +targets.protein, carbs: +targets.carbs, fat: +targets.fat } })
+    setT(null)
+    show('Targets saved')
+  }
+
+  const download = async () => {
+    const data = await exportAll()
+    const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `fitness-hq-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const readJson = (file: File) => file.text().then((s) => JSON.parse(s))
+
+  return (
+    <>
+      <NavBar title="Settings" back="Summary" />
+      <div className="page">
+        <Section title="Daily Targets">
+          <div className="list">
+            {(
+              [
+                ['kcal', 'Calories', 'kcal'],
+                ['protein', 'Protein', 'g'],
+                ['carbs', 'Carbs', 'g'],
+                ['fat', 'Fat', 'g'],
+              ] as const
+            ).map(([k, l, u]) => (
+              <div className="field" key={k}>
+                <label>{l}</label>
+                <input inputMode="numeric" value={targets[k]} onChange={(e) => setT({ ...targets, [k]: e.target.value })} />
+                <span className="muted" style={{ width: 30 }}>{u}</span>
+              </div>
+            ))}
+          </div>
+          {t && (
+            <button className="btn" style={{ marginTop: 8 }} onClick={saveTargets}>
+              Save Targets
+            </button>
+          )}
+          <p className="footnote" style={{ padding: '6px 4px' }}>Changing targets doesn't rewrite past logs.</p>
+        </Section>
+
+        <Section title="Program">
+          <div className="list">
+            <div className="field">
+              <label>Active program</label>
+              <span className="muted">{program?.name}</span>
+            </div>
+            <div className="field">
+              <label>Week 1 starts</label>
+              <input type="date" value={settings.programStart} onChange={(e) => e.target.value && saveSettings({ programStart: mondayOf(e.target.value) })} />
+            </div>
+            <div className="field">
+              <label>Use full-gym swaps</label>
+              <input type="checkbox" checked={settings.useSubstitutes} onChange={(e) => saveSettings({ useSubstitutes: e.target.checked })} style={{ width: 24, height: 24 }} />
+            </div>
+          </div>
+          <p className="footnote" style={{ padding: '6px 4px' }}>
+            Week 1 is the week of {fmtDate(settings.programStart, { month: 'long', day: 'numeric' })}. Turn on full-gym swaps after the move: Smith bench becomes barbell bench, and so on. {program?.gymSwapNote}
+          </p>
+          <button className="btn secondary" onClick={() => progFile.current?.click()}>
+            Import Program File…
+          </button>
+          <input
+            ref={progFile}
+            type="file"
+            accept="application/json,.json"
+            hidden
+            onChange={async (e) => {
+              const f = e.target.files?.[0]
+              if (!f) return
+              try {
+                await importProgram(await readJson(f))
+                show('Program imported')
+              } catch (err) {
+                show(`Import failed: ${(err as Error).message}`)
+              }
+              e.target.value = ''
+            }}
+          />
+        </Section>
+
+        <Section title="Your Data">
+          <p className="footnote" style={{ padding: '0 4px 8px' }}>
+            Everything is saved on this iPhone, so it works offline at the gym. Back up now and then, until cloud sync is added.
+          </p>
+          <div className="stack">
+            <button className="btn secondary" onClick={download}>
+              Export Backup
+            </button>
+            <button className="btn secondary" onClick={() => backupFile.current?.click()}>
+              Restore Backup…
+            </button>
+            <input
+              ref={backupFile}
+              type="file"
+              accept="application/json,.json"
+              hidden
+              onChange={async (e) => {
+                const f = e.target.files?.[0]
+                if (!f) return
+                if (!window.confirm('Replace all data on this device with the backup?')) return
+                try {
+                  await importAll(await readJson(f))
+                  show('Backup restored')
+                } catch (err) {
+                  show(`Restore failed: ${(err as Error).message}`)
+                }
+                e.target.value = ''
+              }}
+            />
+            <button
+              className="btn danger"
+              onClick={async () => {
+                if (!window.confirm('Erase all workouts, food logs and measurements on this device?')) return
+                await Promise.all([db.sessions.clear(), db.food.clear(), db.measurements.clear(), db.grocery.clear(), db.weeks.clear()])
+                show('Data erased')
+              }}
+            >
+              Erase All Logs
+            </button>
+          </div>
+        </Section>
+        <p className="footnote" style={{ textAlign: 'center', padding: 24 }}>Fitness HQ · v{__APP_VERSION__}</p>
+      </div>
+      {toast}
+    </>
+  )
+}

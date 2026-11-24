@@ -1,0 +1,734 @@
+{
+  "version": 1,
+  "name": "Lean-out 4-day",
+  "weeks": 12,
+  "progression": "Double progression. Start at a weight that hits the bottom of the rep range at the week's target RIR. Add reps at the same weight each session. When every working set reaches the top of the range at target RIR, add weight next session: +5 lb Smith bench and upper-body machines/cables, +10 lb Smith squat, RDL, hip thrust and leg press, next dumbbell (+5 lb) for dumbbell lifts; reset reps to the bottom of the range. If reps fall below the bottom of the range two sessions in a row, reduce load 5-10% and rebuild. Holding loads steady in a deficit is a win. 'rir' on each exercise is the baseline; use weekPlan for the week's actual RIR (compound=true uses rirCompound, else rirIsolation).",
+  "deload": "Weeks 6 and 12: half the working sets (round up), load about 90% of week 5/11, RIR 4 on compounds and 3 on isolation. Week 12 check-in: Mon/Tue do one set of Smith bench and Smith squat at the week-1 start weight to 1 RIR and log reps to compare.",
+  "weekPlan": [
+    {
+      "week": 1,
+      "block": 1,
+      "rirCompound": 3,
+      "rirIsolation": 2,
+      "deload": false,
+      "setsMultiplier": 1,
+      "loadMultiplier": 1
+    },
+    {
+      "week": 2,
+      "block": 1,
+      "rirCompound": 2,
+      "rirIsolation": 2,
+      "deload": false,
+      "setsMultiplier": 1,
+      "loadMultiplier": 1
+    },
+    {
+      "week": 3,
+      "block": 1,
+      "rirCompound": 2,
+      "rirIsolation": 1,
+      "deload": false,
+      "setsMultiplier": 1,
+      "loadMultiplier": 1
+    },
+    {
+      "week": 4,
+      "block": 1,
+      "rirCompound": 1.5,
+      "rirIsolation": 1,
+      "deload": false,
+      "setsMultiplier": 1,
+      "loadMultiplier": 1
+    },
+    {
+      "week": 5,
+      "block": 1,
+      "rirCompound": 1,
+      "rirIsolation": 0.5,
+      "deload": false,
+      "setsMultiplier": 1,
+      "loadMultiplier": 1
+    },
+    {
+      "week": 6,
+      "block": 1,
+      "rirCompound": 4,
+      "rirIsolation": 3,
+      "deload": true,
+      "setsMultiplier": 0.5,
+      "loadMultiplier": 0.9
+    },
+    {
+      "week": 7,
+      "block": 2,
+      "rirCompound": 3,
+      "rirIsolation": 2,
+      "deload": false,
+      "setsMultiplier": 1,
+      "loadMultiplier": 1
+    },
+    {
+      "week": 8,
+      "block": 2,
+      "rirCompound": 2,
+      "rirIsolation": 2,
+      "deload": false,
+      "setsMultiplier": 1,
+      "loadMultiplier": 1
+    },
+    {
+      "week": 9,
+      "block": 2,
+      "rirCompound": 2,
+      "rirIsolation": 1,
+      "deload": false,
+      "setsMultiplier": 1,
+      "loadMultiplier": 1
+    },
+    {
+      "week": 10,
+      "block": 2,
+      "rirCompound": 1.5,
+      "rirIsolation": 1,
+      "deload": false,
+      "setsMultiplier": 1,
+      "loadMultiplier": 1
+    },
+    {
+      "week": 11,
+      "block": 2,
+      "rirCompound": 1,
+      "rirIsolation": 0.5,
+      "deload": false,
+      "setsMultiplier": 1,
+      "loadMultiplier": 1
+    },
+    {
+      "week": 12,
+      "block": 2,
+      "rirCompound": 4,
+      "rirIsolation": 3,
+      "deload": true,
+      "setsMultiplier": 0.5,
+      "loadMultiplier": 0.9
+    }
+  ],
+  "steps": [
+    {
+      "weeks": [
+        1,
+        2
+      ],
+      "dailyTarget": 7000
+    },
+    {
+      "weeks": [
+        3,
+        4
+      ],
+      "dailyTarget": 8500
+    },
+    {
+      "weeks": [
+        5,
+        12
+      ],
+      "dailyTarget": 10000
+    }
+  ],
+  "gymSwapNote": "substitutions[0] is the preferred full-gym swap. Swap at week 7 (or next session after the move). First session on a swapped lift is a calibration; barbell versions usually start 5-15% lighter than Smith.",
+  "tracking": [
+    "Morning weight daily (show 7-day average)",
+    "Waist at navel weekly",
+    "Photos every 2 weeks",
+    "Daily steps",
+    "Every working set: weight, reps, RIR"
+  ],
+  "nutrition": {
+    "kcal": 2550,
+    "proteinG": 180,
+    "carbsG": 289,
+    "fatG": 75,
+    "adjustmentRule": "Every 2 weeks on weekly-average weight: <0.5 lb/wk loss -> +2,000 steps/day first, then -150 kcal from carbs if still slow 2 weeks later; 0.5-1.0 lb/wk -> no change; >1.25 lb/wk or lifts falling fast -> +150 kcal from carbs."
+  },
+  "days": [
+    {
+      "key": "upper-a",
+      "name": "Upper A",
+      "weekday": 1,
+      "kind": "strength",
+      "warmup": "5 min incline walk (12%, 3.0 mph), then 3-5 min bands for the muscles trained today",
+      "notes": "Bench strength + horizontal pull. ~55 min.",
+      "exercises": [
+        {
+          "name": "Smith Machine Bench Press",
+          "equipment": "smith",
+          "muscle": "chest",
+          "sets": 4,
+          "repsMin": 4,
+          "repsMax": 6,
+          "restSec": 180,
+          "rir": 2,
+          "warmupSets": 2,
+          "startWeight": 185,
+          "startWeightIsEstimate": false,
+          "perSide": false,
+          "compound": true,
+          "notes": "From 205x4. Log plates the same way every time.",
+          "supersetGroup": null,
+          "substitutions": [
+            "Barbell Bench Press"
+          ]
+        },
+        {
+          "name": "Seated Cable Row",
+          "equipment": "cable",
+          "muscle": "back",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 10,
+          "restSec": 120,
+          "rir": 2,
+          "warmupSets": 0,
+          "startWeight": 140,
+          "startWeightIsEstimate": true,
+          "perSide": false,
+          "compound": true,
+          "notes": "",
+          "supersetGroup": null,
+          "substitutions": [
+            "Chest-Supported T-Bar Row",
+            "Machine Row"
+          ]
+        },
+        {
+          "name": "Incline Dumbbell Press",
+          "equipment": "dumbbell",
+          "muscle": "chest",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 10,
+          "restSec": 120,
+          "rir": 2,
+          "warmupSets": 0,
+          "startWeight": 60,
+          "startWeightIsEstimate": true,
+          "perSide": false,
+          "compound": false,
+          "notes": "30 degree bench. Weight per dumbbell.",
+          "supersetGroup": null,
+          "substitutions": []
+        },
+        {
+          "name": "Lat Pulldown (Wide Grip)",
+          "equipment": "machine",
+          "muscle": "back",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "restSec": 90,
+          "rir": 2,
+          "warmupSets": 0,
+          "startWeight": 140,
+          "startWeightIsEstimate": true,
+          "perSide": false,
+          "compound": false,
+          "notes": "",
+          "supersetGroup": null,
+          "substitutions": []
+        },
+        {
+          "name": "Cable Lateral Raise",
+          "equipment": "cable",
+          "muscle": "shoulders",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "restSec": 60,
+          "rir": 1,
+          "warmupSets": 0,
+          "startWeight": 15,
+          "startWeightIsEstimate": true,
+          "perSide": true,
+          "compound": false,
+          "notes": "",
+          "supersetGroup": null,
+          "substitutions": [
+            "Dumbbell Lateral Raise"
+          ]
+        },
+        {
+          "name": "Dumbbell Curl",
+          "equipment": "dumbbell",
+          "muscle": "biceps",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "restSec": 60,
+          "rir": 1,
+          "warmupSets": 0,
+          "startWeight": 25,
+          "startWeightIsEstimate": true,
+          "perSide": false,
+          "compound": false,
+          "notes": "Superset with pushdown.",
+          "supersetGroup": "A",
+          "substitutions": [
+            "EZ-Bar Curl"
+          ]
+        },
+        {
+          "name": "Rope Triceps Pushdown",
+          "equipment": "cable",
+          "muscle": "triceps",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "restSec": 60,
+          "rir": 1,
+          "warmupSets": 0,
+          "startWeight": 50,
+          "startWeightIsEstimate": true,
+          "perSide": false,
+          "compound": false,
+          "notes": "Superset with curl.",
+          "supersetGroup": "A",
+          "substitutions": []
+        }
+      ]
+    },
+    {
+      "key": "lower-a",
+      "name": "Lower A",
+      "weekday": 2,
+      "kind": "strength",
+      "warmup": "5 min incline walk (12%, 3.0 mph), then 3-5 min bands for the muscles trained today",
+      "notes": "Squat strength + quads. ~55 min.",
+      "exercises": [
+        {
+          "name": "Smith Machine Back Squat",
+          "equipment": "smith",
+          "muscle": "quads",
+          "sets": 4,
+          "repsMin": 5,
+          "repsMax": 7,
+          "restSec": 180,
+          "rir": 2,
+          "warmupSets": 2,
+          "startWeight": 205,
+          "startWeightIsEstimate": false,
+          "perSide": false,
+          "compound": true,
+          "notes": "From 225x5.",
+          "supersetGroup": null,
+          "substitutions": [
+            "Barbell Back Squat",
+            "Hack Squat"
+          ]
+        },
+        {
+          "name": "Dumbbell Romanian Deadlift",
+          "equipment": "dumbbell",
+          "muscle": "hamstrings",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 10,
+          "restSec": 120,
+          "rir": 2,
+          "warmupSets": 0,
+          "startWeight": 60,
+          "startWeightIsEstimate": true,
+          "perSide": false,
+          "compound": true,
+          "notes": "Weight per dumbbell.",
+          "supersetGroup": null,
+          "substitutions": [
+            "Barbell Romanian Deadlift"
+          ]
+        },
+        {
+          "name": "Leg Press",
+          "equipment": "machine",
+          "muscle": "quads",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "restSec": 120,
+          "rir": 2,
+          "warmupSets": 0,
+          "startWeight": 270,
+          "startWeightIsEstimate": true,
+          "perSide": false,
+          "compound": false,
+          "notes": "",
+          "supersetGroup": null,
+          "substitutions": []
+        },
+        {
+          "name": "Dumbbell Reverse Lunge",
+          "equipment": "dumbbell",
+          "muscle": "glutes",
+          "sets": 2,
+          "repsMin": 10,
+          "repsMax": 10,
+          "restSec": 90,
+          "rir": 2,
+          "warmupSets": 0,
+          "startWeight": 35,
+          "startWeightIsEstimate": true,
+          "perSide": true,
+          "compound": false,
+          "notes": "Reps per leg. Weight per dumbbell.",
+          "supersetGroup": null,
+          "substitutions": []
+        },
+        {
+          "name": "Smith Machine Standing Calf Raise",
+          "equipment": "smith",
+          "muscle": "calves",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 15,
+          "restSec": 60,
+          "rir": 1,
+          "warmupSets": 0,
+          "startWeight": 135,
+          "startWeightIsEstimate": true,
+          "perSide": false,
+          "compound": false,
+          "notes": "",
+          "supersetGroup": null,
+          "substitutions": [
+            "Standing Calf Raise Machine"
+          ]
+        },
+        {
+          "name": "Cable Crunch",
+          "equipment": "cable",
+          "muscle": "abs",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 15,
+          "restSec": 60,
+          "rir": 1,
+          "warmupSets": 0,
+          "startWeight": 70,
+          "startWeightIsEstimate": true,
+          "perSide": false,
+          "compound": false,
+          "notes": "",
+          "supersetGroup": null,
+          "substitutions": []
+        }
+      ]
+    },
+    {
+      "key": "cardio-wed",
+      "name": "Cardio",
+      "weekday": 3,
+      "kind": "cardio",
+      "warmup": "",
+      "notes": "",
+      "exercises": [],
+      "cardio": {
+        "modality": "incline walk, bike or stair climber",
+        "minutes": 25,
+        "minutesMax": 30,
+        "hrLow": 120,
+        "hrHigh": 140,
+        "notes": "Zone 2: can talk in full sentences. Weeks 7-11 optional: replace 10 min with 6 rounds of 30 s hard bike / 90 s easy."
+      }
+    },
+    {
+      "key": "upper-b",
+      "name": "Upper B",
+      "weekday": 4,
+      "kind": "strength",
+      "warmup": "5 min incline walk (12%, 3.0 mph), then 3-5 min bands for the muscles trained today",
+      "notes": "Shoulders, vertical pull, arms. ~55 min.",
+      "exercises": [
+        {
+          "name": "Seated Dumbbell Shoulder Press",
+          "equipment": "dumbbell",
+          "muscle": "shoulders",
+          "sets": 3,
+          "repsMin": 6,
+          "repsMax": 8,
+          "restSec": 150,
+          "rir": 2,
+          "warmupSets": 2,
+          "startWeight": 50,
+          "startWeightIsEstimate": true,
+          "perSide": false,
+          "compound": true,
+          "notes": "Weight per dumbbell.",
+          "supersetGroup": null,
+          "substitutions": [
+            "Machine Shoulder Press"
+          ]
+        },
+        {
+          "name": "Lat Pulldown (Close Neutral Grip)",
+          "equipment": "machine",
+          "muscle": "back",
+          "sets": 4,
+          "repsMin": 8,
+          "repsMax": 10,
+          "restSec": 120,
+          "rir": 2,
+          "warmupSets": 0,
+          "startWeight": 150,
+          "startWeightIsEstimate": true,
+          "perSide": false,
+          "compound": true,
+          "notes": "",
+          "supersetGroup": null,
+          "substitutions": []
+        },
+        {
+          "name": "Machine Chest Press",
+          "equipment": "machine",
+          "muscle": "chest",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "restSec": 90,
+          "rir": 2,
+          "warmupSets": 0,
+          "startWeight": null,
+          "startWeightIsEstimate": true,
+          "perSide": false,
+          "compound": false,
+          "notes": "Calibrate in week 1.",
+          "supersetGroup": null,
+          "substitutions": [
+            "Hammer Strength Incline Press"
+          ]
+        },
+        {
+          "name": "One-Arm Dumbbell Row",
+          "equipment": "dumbbell",
+          "muscle": "back",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 10,
+          "restSec": 90,
+          "rir": 2,
+          "warmupSets": 0,
+          "startWeight": 70,
+          "startWeightIsEstimate": true,
+          "perSide": true,
+          "compound": false,
+          "notes": "Reps per arm.",
+          "supersetGroup": null,
+          "substitutions": []
+        },
+        {
+          "name": "Cable Face Pull",
+          "equipment": "cable",
+          "muscle": "rear delts",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 15,
+          "restSec": 60,
+          "rir": 1,
+          "warmupSets": 0,
+          "startWeight": 40,
+          "startWeightIsEstimate": true,
+          "perSide": false,
+          "compound": false,
+          "notes": "",
+          "supersetGroup": null,
+          "substitutions": []
+        },
+        {
+          "name": "Incline Dumbbell Curl",
+          "equipment": "dumbbell",
+          "muscle": "biceps",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "restSec": 60,
+          "rir": 1,
+          "warmupSets": 0,
+          "startWeight": 20,
+          "startWeightIsEstimate": true,
+          "perSide": false,
+          "compound": false,
+          "notes": "Superset with overhead extension.",
+          "supersetGroup": "A",
+          "substitutions": []
+        },
+        {
+          "name": "Overhead Cable Triceps Extension",
+          "equipment": "cable",
+          "muscle": "triceps",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 12,
+          "restSec": 60,
+          "rir": 1,
+          "warmupSets": 0,
+          "startWeight": 40,
+          "startWeightIsEstimate": true,
+          "perSide": false,
+          "compound": false,
+          "notes": "Superset with curl.",
+          "supersetGroup": "A",
+          "substitutions": []
+        }
+      ]
+    },
+    {
+      "key": "lower-b",
+      "name": "Lower B",
+      "weekday": 5,
+      "kind": "strength",
+      "warmup": "5 min incline walk (12%, 3.0 mph), then 3-5 min bands for the muscles trained today",
+      "notes": "Hinge, glutes, hamstrings. ~55 min.",
+      "exercises": [
+        {
+          "name": "Smith Machine Romanian Deadlift",
+          "equipment": "smith",
+          "muscle": "hamstrings",
+          "sets": 4,
+          "repsMin": 6,
+          "repsMax": 8,
+          "restSec": 150,
+          "rir": 2,
+          "warmupSets": 2,
+          "startWeight": 185,
+          "startWeightIsEstimate": true,
+          "perSide": false,
+          "compound": true,
+          "notes": "",
+          "supersetGroup": null,
+          "substitutions": [
+            "Barbell Romanian Deadlift"
+          ]
+        },
+        {
+          "name": "Dumbbell Bulgarian Split Squat",
+          "equipment": "dumbbell",
+          "muscle": "quads",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 10,
+          "restSec": 120,
+          "rir": 2,
+          "warmupSets": 0,
+          "startWeight": 40,
+          "startWeightIsEstimate": true,
+          "perSide": true,
+          "compound": true,
+          "notes": "Reps per leg. Weight per dumbbell.",
+          "supersetGroup": null,
+          "substitutions": []
+        },
+        {
+          "name": "Smith Machine Hip Thrust",
+          "equipment": "smith",
+          "muscle": "glutes",
+          "sets": 3,
+          "repsMin": 8,
+          "repsMax": 12,
+          "restSec": 120,
+          "rir": 2,
+          "warmupSets": 0,
+          "startWeight": 185,
+          "startWeightIsEstimate": true,
+          "perSide": false,
+          "compound": false,
+          "notes": "",
+          "supersetGroup": null,
+          "substitutions": [
+            "Hip Thrust Machine",
+            "Barbell Hip Thrust"
+          ]
+        },
+        {
+          "name": "Standing Cable Leg Curl",
+          "equipment": "cable",
+          "muscle": "hamstrings",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 15,
+          "restSec": 60,
+          "rir": 1,
+          "warmupSets": 0,
+          "startWeight": 30,
+          "startWeightIsEstimate": true,
+          "perSide": true,
+          "compound": false,
+          "notes": "Ankle cuff. Reps per leg.",
+          "supersetGroup": null,
+          "substitutions": [
+            "Seated Leg Curl",
+            "Lying Leg Curl"
+          ]
+        },
+        {
+          "name": "Leg Press Calf Raise",
+          "equipment": "machine",
+          "muscle": "calves",
+          "sets": 3,
+          "repsMin": 12,
+          "repsMax": 20,
+          "restSec": 60,
+          "rir": 1,
+          "warmupSets": 0,
+          "startWeight": 180,
+          "startWeightIsEstimate": true,
+          "perSide": false,
+          "compound": false,
+          "notes": "",
+          "supersetGroup": null,
+          "substitutions": []
+        },
+        {
+          "name": "Pallof Press",
+          "equipment": "cable",
+          "muscle": "abs",
+          "sets": 3,
+          "repsMin": 10,
+          "repsMax": 10,
+          "restSec": 60,
+          "rir": 2,
+          "warmupSets": 0,
+          "startWeight": 30,
+          "startWeightIsEstimate": true,
+          "perSide": true,
+          "compound": false,
+          "notes": "Reps per side.",
+          "supersetGroup": null,
+          "substitutions": []
+        }
+      ]
+    },
+    {
+      "key": "optional-sat",
+      "name": "Optional Cardio",
+      "weekday": 6,
+      "kind": "optional-cardio",
+      "warmup": "",
+      "notes": "Skip if legs are beat from Friday.",
+      "exercises": [],
+      "cardio": {
+        "modality": "easy run or brisk walk",
+        "minutes": 30,
+        "distanceMiles": 2,
+        "notes": "Easy 2-mile run OR 30 min brisk walk, conversational pace."
+      }
+    },
+    {
+      "key": "rest-sun",
+      "name": "Rest",
+      "weekday": 7,
+      "kind": "rest",
+      "warmup": "",
+      "notes": "Dog walk, nothing structured.",
+      "exercises": []
+    }
+  ]
+}
