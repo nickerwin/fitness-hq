@@ -34,6 +34,12 @@ export interface ExercisePrescription {
   substitutions?: string[]
 }
 
+export interface WarmupMove {
+  name: string
+  dose: string
+  cue?: string
+}
+
 export interface ProgramDay {
   key: string
   name: string
@@ -41,6 +47,8 @@ export interface ProgramDay {
   weekday: number
   kind: DayKind
   warmup?: string
+  /** A short routine done before the first lift, ticked off in the workout. */
+  warmupRoutine?: WarmupMove[]
   notes?: string
   exercises: ExercisePrescription[]
   cardio?: {
@@ -67,6 +75,8 @@ export interface WeekPlan {
 /** Import format shared with the program-design thread (program.json). */
 export interface Program {
   version: 1
+  /** Bumped when the built-in program changes, so devices update their copy. */
+  revision?: number
   name: string
   progression?: string
   deload?: string
@@ -130,6 +140,8 @@ export interface WorkoutSession extends SyncFields {
   exercises: LoggedExercise[]
   cardio?: { modality: string; minutes: number | null; distance?: number | null; avgHr?: number | null; done: boolean }
   notes?: string
+  /** Indexes of warm-up moves ticked off. */
+  warmupDone?: number[]
 }
 
 // ---------- Nutrition ----------

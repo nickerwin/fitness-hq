@@ -5,6 +5,7 @@ import { db } from '../db'
 import type { LoggedExercise, LoggedSet, WorkoutSession } from '../types'
 import { NavBar, Sheet } from '../components/ui'
 import { CoachCard } from '../components/CoachCard'
+import { WarmupCard } from '../components/WarmupCard'
 import { IconCheck, IconClock } from '../components/icons'
 import { fmtDate, fmtDuration } from '../lib/dates'
 import { nextTimePlan, sessionStats, type Suggestion } from '../lib/training'
@@ -194,9 +195,21 @@ export default function Workout() {
           <div className="progress-line">
             <div style={{ width: `${pct * 100}%` }} />
           </div>
-          {!isDone && day?.warmup && <div className="footnote" style={{ marginTop: 8 }}>Warm-up: {day.warmup}</div>}
           {isDone && <div className="banner" style={{ background: 'color-mix(in srgb, var(--nutri) 14%, var(--card))' }}>Workout complete. Tap Edit to change any set.</div>}
         </div>
+
+        {!isDone && day && (
+          <WarmupCard
+            day={day}
+            done={s.warmupDone}
+            collapsed={s.exercises.some((e) => e.sets.some((x) => x.done))}
+            onToggle={(i) => mutate((d) => {
+              const cur = d.warmupDone ?? []
+              d.warmupDone = cur.includes(i) ? cur.filter((x) => x !== i) : [...cur, i]
+            })}
+            style={{ marginTop: 8 }}
+          />
+        )}
 
         {s.cardio && <CardioCard s={s} save={save} disabled={isDone} note={day?.cardio} />}
 

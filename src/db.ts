@@ -165,6 +165,25 @@ export async function ensureSeeded() {
     }
     if (!(await db.settings.get('settings'))) await db.settings.put({ ...DEFAULT_SETTINGS, _mt: 0, _keep: true } as Settings)
   })
+  await upgradeDefaultProgram()
+}
+
+/**
+ * When the built-in program gets a new revision, bring the stored copy's warm-ups up to date.
+ * Only warm-up fields change, so exercise edits and the coach's changes stay. Runs at start-up and after each sync pull.
+ */
+export async function upgradeDefaultProgram() {
+  const bundled = defaultProgram as unknown as Program
+  const target = bundled.revision ?? 1
+  await db.transaction('rw', db.programs, async () => {
+    const p = await db.programs.where('uid').equals(DEFAULT_PROGRAM_UID).first()
+    if (!p || (p.revision ?? 1) >= target) return
+    const days = p.days.map((d) => {
+      const b = bundled.days.find((x) => x.key === d.key)
+      return b ? { ...d, warmup: b.warmup, warmupRoutine: b.warmupRoutine } : d
+    })
+    await db.programs.put({ ...p, days, revision: target })
+  })
 }
 
 export async function importProgram(p: Program) {
