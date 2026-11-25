@@ -313,6 +313,18 @@ async function pullHealthInbox(tok: string): Promise<number> {
   return n
 }
 
+/** New daily targets from the coach replace the current ones once. */
+async function applyCoachTargets() {
+  const t = await db.coach.get('targets')
+  if (!t?.kcal || !t.setAt) return
+  const applied = await metaGet<string>('coach.targetsApplied', '')
+  if (t.setAt <= applied) return
+  const cur = await db.settings.get('settings')
+  // A target set by hand after the coach's change wins.
+  if (cur && Date.parse(t.setAt) > (cur._mt ?? 0)) await db.settings.put({ ...cur, targets: { kcal: t.kcal, protein: t.protein ?? cur.targets.protein, carbs: t.carbs ?? cur.targets.carbs, fat: t.fat ?? cur.targets.fat } })
+  await metaSet('coach.targetsApplied', t.setAt)
+}
+
 let running: Promise<void> | null = null
 let again = false
 
@@ -329,6 +341,7 @@ export function syncNow(): Promise<void> {
         again = false
         const { token: tok, userId } = await token()
         await pull(tok)
+        await applyCoachTargets()
         await pullHealthInbox(tok).catch((e) => {
           // The Health inbox is optional: an older database setup may not have it.
           if (!(e instanceof HttpError && e.status === 404)) throw e

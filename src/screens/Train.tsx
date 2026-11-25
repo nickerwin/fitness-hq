@@ -5,7 +5,7 @@ import { useProgram, useSettings } from '../hooks'
 import { LargeTitle, NavBar, Row, Section } from '../components/ui'
 import { LineChart } from '../components/LineChart'
 import { addDays, fmtDate, mondayOf, WEEKDAY_LONG, WEEKDAY_SHORT, ymd } from '../lib/dates'
-import { APARTMENT_MAX_DB, bestSet, dayFor, e1rm, exerciseName, programWeek, recentPerformances, sessionStats, suggestNext, weekPlanFor } from '../lib/training'
+import { APARTMENT_MAX_DB, applyCoach, bestSet, lastPerformedAt, dayFor, e1rm, exerciseName, programWeek, recentPerformances, sessionStats, suggestNext, weekPlanFor } from '../lib/training'
 import { doneHistory, startWorkout } from '../lib/actions'
 import type { ExercisePrescription, ProgramDay, WorkoutSession } from '../types'
 import { TrendPill } from './Workout'
@@ -177,6 +177,7 @@ export function DayPreview() {
   const settings = useSettings()
   const nav = useNavigate()
   const history = useLiveQuery(() => doneHistory(), [])
+  const coach = useLiveQuery(async () => new Map((await db.coach.toArray()).map((c) => [c.key, c])), [])
   if (!program) return null
   const d = program.days.find((x) => x.key === key)
   if (!d) return <NavBar title="Not found" />
@@ -184,7 +185,8 @@ export function DayPreview() {
   const plan = weekPlanFor(program, week)
   const sugFor = (ex: ExercisePrescription) => {
     const name = exerciseName(ex, settings.useSubstitutes)
-    return suggestNext(ex, name, recentPerformances(history ?? [], name, 2, program), plan, { maxDumbbell: settings.useSubstitutes ? undefined : APARTMENT_MAX_DB })
+    const auto = suggestNext(ex, name, recentPerformances(history ?? [], name, 2, program), plan, { maxDumbbell: settings.useSubstitutes ? undefined : APARTMENT_MAX_DB })
+    return applyCoach(auto, coach?.get(`override:${name}`), lastPerformedAt(history ?? [], name))
   }
   const start = async () => {
     const id = await startWorkout(program, d, ymd(), settings)

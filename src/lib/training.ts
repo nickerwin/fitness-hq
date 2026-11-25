@@ -1,4 +1,5 @@
 import type {
+  CoachRecord,
   SuggestTrend,
   ExercisePrescription,
   LoggedExercise,
@@ -159,6 +160,21 @@ export function nextTimePlan(program: Program, session: WorkoutSession, history:
     })
 }
 
+/** When this exercise was last done (session start time), or undefined. */
+export function lastPerformedAt(history: WorkoutSession[], name: string): string | undefined {
+  return history.find((s) => s.exercises.some((e) => e.name === name && hasWork(e)))?.startedAt
+}
+
+/**
+ * A coach override replaces the automatic suggestion for the next session only:
+ * it applies while it is newer than the last time the exercise was done.
+ */
+export function applyCoach(sug: Suggestion, ov: CoachRecord | undefined, lastAt: string | undefined): Suggestion & { reps?: number | null } {
+  if (!ov || ov.weight == null || (lastAt && ov.setAt <= lastAt)) return sug
+  const trend = sug.weight == null ? 'new' : ov.weight > sug.weight ? 'up' : ov.weight < sug.weight ? 'down' : 'hold'
+  return { weight: ov.weight, reps: ov.reps ?? null, reason: `Coach: ${ov.note ?? `${ov.weight} lb`}`, trend }
+}
+
 export function buildSession(
   program: Program,
   day: ProgramDay,
@@ -166,13 +182,18 @@ export function buildSession(
   week: number,
   history: WorkoutSession[],
   useSubstitutes: boolean,
+  coach: Map<string, CoachRecord> = new Map(),
 ): WorkoutSession {
   const plan = weekPlanFor(program, week)
   const exercises: LoggedExercise[] = day.exercises.map((ex) => {
     const name = exerciseName(ex, useSubstitutes)
     const last = lastPerformance(history, name)
     const recent = recentPerformances(history, name, 2, program)
-    const sug = suggestNext(ex, name, recent, plan, { maxDumbbell: useSubstitutes ? undefined : APARTMENT_MAX_DB })
+    const sug = applyCoach(
+      suggestNext(ex, name, recent, plan, { maxDumbbell: useSubstitutes ? undefined : APARTMENT_MAX_DB }),
+      coach.get(`override:${name}`),
+      lastPerformedAt(history, name),
+    )
     const weight = sug.weight
     const nSets = Math.max(1, Math.ceil(ex.sets * plan.setsMultiplier))
     const targetRir = ex.compound ? plan.rirCompound : plan.rirIsolation
@@ -203,7 +224,7 @@ export function buildSession(
         rir: null,
         done: false,
         suggestWeight: weight,
-        suggestReps: suggestRepsFor(ex, weight, prev),
+        suggestReps: sug.reps ?? suggestRepsFor(ex, weight, prev),
         prevWeight: prev?.weight ?? null,
         prevReps: prev?.reps ?? null,
       })

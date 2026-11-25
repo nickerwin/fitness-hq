@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie'
-import type { Checkin, FoodEntry, GroceryCheck, Measurement, PlannedWeek, Program, Settings, StoredProgram, WorkoutSession } from './types'
+import type { Checkin, CoachRecord, FoodEntry, GroceryCheck, Measurement, PlannedWeek, Program, Settings, StoredProgram, WorkoutSession } from './types'
 import defaultProgram from './data/program.json'
 import { mondayOf, ymd } from './lib/dates'
 
@@ -25,6 +25,7 @@ class FitnessDB extends Dexie {
   measurements!: Table<Measurement, number>
   settings!: Table<Settings, string>
   checkins!: Table<Checkin, string>
+  coach!: Table<CoachRecord, string>
   meta!: Table<Meta, string>
   tombstones!: Table<Tombstone, string>
 
@@ -52,7 +53,7 @@ class FitnessDB extends Dexie {
       .upgrade(async (tx) => {
         const now = Date.now()
         for (const t of SYNC_TABLES) {
-          if (t === 'checkins') continue
+          if (t === 'checkins' || t === 'coach') continue
           await tx
             .table(t)
             .toCollection()
@@ -62,6 +63,8 @@ class FitnessDB extends Dexie {
             })
         }
       })
+    // v3: notes, weight changes and targets written by the coach.
+    this.version(3).stores({ coach: 'key' })
   }
 }
 
@@ -70,7 +73,7 @@ export const db = new FitnessDB()
 // ---------- Sync bookkeeping ----------
 
 /** Tables that sync to the cloud, and how each record is identified across devices. */
-export const SYNC_TABLES = ['programs', 'sessions', 'food', 'weeks', 'grocery', 'measurements', 'settings', 'checkins'] as const
+export const SYNC_TABLES = ['programs', 'sessions', 'food', 'weeks', 'grocery', 'measurements', 'settings', 'checkins', 'coach'] as const
 export type SyncTable = (typeof SYNC_TABLES)[number]
 const UID_TABLES = new Set<string>(['programs', 'sessions', 'food'])
 export const DEFAULT_PROGRAM_UID = 'program-default'
