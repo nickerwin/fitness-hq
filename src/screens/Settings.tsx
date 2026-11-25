@@ -1,4 +1,6 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { disablePush, enablePush, pushState, testNotification, type PushState } from '../lib/push'
+import { useSync } from '../lib/sync'
 import { eraseLogs, exportAll, importAll, importProgram } from '../db'
 import { saveSettings, useProgram, useSettings } from '../hooks'
 import { NavBar, Row, Section, useToast } from '../components/ui'
@@ -116,6 +118,8 @@ export default function Settings() {
           </div>
         </Section>
 
+        <NotificationsSection show={show} />
+
         <Section title="Your Data">
           <p className="footnote" style={{ padding: '0 4px 8px' }}>
             Everything is saved on this iPhone first, so it works offline at the gym. Cloud Sync keeps a copy online. A backup file is a handy extra copy you can keep in Files.
@@ -161,5 +165,58 @@ export default function Settings() {
       </div>
       {toast}
     </>
+  )
+}
+
+function NotificationsSection({ show }: { show: (m: string) => void }) {
+  const sync = useSync()
+  const [state, setState] = useState<PushState | null>(null)
+  const [busy, setBusy] = useState(false)
+  useEffect(() => {
+    pushState().then(setState).catch(() => setState('unsupported'))
+  }, [])
+  const signedIn = sync.status !== 'off'
+  const run = async (fn: () => Promise<unknown>, ok: string) => {
+    setBusy(true)
+    try {
+      await fn()
+      setState(await pushState())
+      show(ok)
+    } catch (e) {
+      show((e as Error).message)
+    } finally {
+      setBusy(false)
+    }
+  }
+  let body
+  if (state === null) body = null
+  else if (state === 'needs-home-screen') body = <p className="footnote" style={{ padding: '0 4px' }}>Open Fitness HQ from its Home Screen icon (not Safari) to turn on notifications.</p>
+  else if (state === 'unsupported') body = <p className="footnote" style={{ padding: '0 4px' }}>This device or browser doesn't support notifications. On iPhone, update to iOS 16.4 or later.</p>
+  else if (state === 'denied') body = <p className="footnote" style={{ padding: '0 4px' }}>Notifications are blocked. Turn them on in iPhone Settings → Notifications → Fitness HQ, then come back here.</p>
+  else if (!signedIn) body = <p className="footnote" style={{ padding: '0 4px' }}>Turn on Cloud Sync first. The coach sends notifications through your cloud account.</p>
+  else if (state === 'off')
+    body = (
+      <button className="btn" disabled={busy} onClick={() => run(enablePush, 'Notifications on')}>
+        Turn On Notifications
+      </button>
+    )
+  else
+    body = (
+      <div className="stack">
+        <button className="btn secondary" disabled={busy} onClick={() => run(testNotification, 'Sent a test')}>
+          Send Test Notification
+        </button>
+        <button className="btn danger" disabled={busy} onClick={() => run(disablePush, 'Notifications off')}>
+          Turn Off Notifications
+        </button>
+      </div>
+    )
+  return (
+    <Section title="Notifications">
+      <p className="footnote" style={{ padding: '0 4px 8px' }}>
+        {state === 'on' ? 'On. ' : ''}Get the coach's post-workout note on your lock screen, about an hour or less after you finish.
+      </p>
+      {body}
+    </Section>
   )
 }

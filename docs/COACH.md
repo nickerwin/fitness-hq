@@ -46,6 +46,10 @@ Save it to a scratch file, then run:
 
 ## 5. Tell Nick
 
+Send a lock-screen notification. This is a short version of the note (one or two sentences, 400 characters max):
+`python3 scripts/coach_push.py --title "Coach: <Day>" --body "<one-line verdict + next-time change>" --url "#/"`
+
+
 Post the same note in the project thread, along with any changes made: overrides, targets and PRs. Keep it skimmable. Never invent data that isn't in the pull.
 
 Credentials live in `/mnt/project-files/coach/access.json`. The coach key can read everything but can only write coach records.
