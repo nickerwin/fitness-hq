@@ -384,6 +384,22 @@ function randomToken() {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
 }
 
+/** Save this device's push subscription so the coach can send lock-screen notifications. */
+export async function savePushSubscription(sub: { endpoint: string; p256dh: string; auth: string }) {
+  const { token: tok, userId } = await token()
+  await http('/rest/v1/fhq_push_subs?on_conflict=endpoint', {
+    method: 'POST',
+    token: tok,
+    headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({ ...sub, user_id: userId }),
+  })
+}
+
+export async function deletePushSubscription(endpoint: string) {
+  const { token: tok } = await token()
+  await http(`/rest/v1/fhq_push_subs?endpoint=eq.${encodeURIComponent(endpoint)}`, { method: 'DELETE', token: tok, headers: { Prefer: 'return=minimal' } })
+}
+
 /** Coach key: read-only access to this account's synced records, for sharing with a coach. */
 export async function createCoachToken(): Promise<string> {
   const { token: tok, userId } = await token()

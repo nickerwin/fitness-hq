@@ -130,3 +130,49 @@ begin
 end $$;
 revoke all on function public.fhq_coach_write(text, text, jsonb) from public;
 grant execute on function public.fhq_coach_write(text, text, jsonb) to anon, authenticated;
+
+-- 5) Lock-screen notifications: the app saves each device's push subscription here, and the coach
+--    key can read them to send post-workout notes.
+create table if not exists public.fhq_push_subs (
+  endpoint text primary key,
+  user_id uuid not null default auth.uid() references auth.users on delete cascade,
+  p256dh text not null,
+  auth text not null,
+  created_at timestamptz not null default now()
+);
+alter table public.fhq_push_subs enable row level security;
+drop policy if exists "own push subs" on public.fhq_push_subs;
+create policy "own push subs" on public.fhq_push_subs for all to authenticated
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
+grant select, insert, update, delete on public.fhq_push_subs to authenticated;
+
+create or replace function public.fhq_coach_push_subs(token text)
+returns table (endpoint text, p256dh text, auth text)
+language plpgsql stable security definer set search_path = public as $$
+declare uid uuid;
+begin
+  select t.user_id into uid from public.fhq_coach_tokens t where t.token = fhq_coach_push_subs.token;
+  if uid is null then
+    raise exception 'Unknown or revoked coach key';
+  end if;
+  return query select s.endpoint, s.p256dh, s.auth from public.fhq_push_subs s where s.user_id = uid;
+end $$;
+revoke all on function public.fhq_coach_push_subs(text) from public;
+grant execute on function public.fhq_coach_push_subs(text) to anon, authenticated;
+
+create or replace function public.fhq_coach_drop_push(token text, endpoint text)
+returns text language plpgsql security definer set search_path = public as $$
+declare uid uuid;
+begin
+  select t.user_id into uid from public.fhq_coach_tokens t where t.token = fhq_coach_drop_push.token;
+  if uid is null then
+    raise exception 'Unknown or revoked coach key';
+  end if;
+  delete from public.fhq_push_subs s where s.user_id = uid and s.endpoint = fhq_coach_drop_push.endpoint;
+  return 'ok';
+end $$;
+revoke all on function public.fhq_coach_drop_push(text, text) from public;
+grant execute on function public.fhq_coach_drop_push(text, text) to anon, authenticated;
+
+-- Make the API see new functions right away.
+notify pgrst, 'reload schema';
