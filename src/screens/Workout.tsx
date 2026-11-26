@@ -5,6 +5,7 @@ import { db } from '../db'
 import type { LoggedExercise, LoggedSet, WorkoutSession } from '../types'
 import { NavBar, Sheet } from '../components/ui'
 import { CoachCard } from '../components/CoachCard'
+import { WarmupCard } from '../components/WarmupCard'
 import { IconCheck, IconClock } from '../components/icons'
 import { fmtDate, fmtDuration } from '../lib/dates'
 import { nextTimePlan, sessionStats, type Suggestion } from '../lib/training'
@@ -12,6 +13,32 @@ import { doneHistory } from '../lib/actions'
 import { useProgram, useSettings } from '../hooks'
 
 const numOrNull = (v: string) => (v.trim() === '' || isNaN(Number(v)) ? null : Number(v))
+
+/**
+ * A number field that keeps what you type ("6.", "22.") while you type it, so decimals work.
+ * It shows the saved value again when that changes from outside (another set, a sync).
+ */
+function NumInput({ value, onValue, ...rest }: { value: number | null | undefined; onValue: (n: number | null) => void } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'>) {
+  const [text, setText] = useState(value == null ? '' : String(value))
+  const [seen, setSeen] = useState(value)
+  if (value !== seen) {
+    setSeen(value)
+    if (numOrNull(text.replace(',', '.')) !== (value ?? null)) setText(value == null ? '' : String(value))
+  }
+  return (
+    <input
+      {...rest}
+      value={text}
+      onChange={(e) => {
+        const t = e.target.value.replace(',', '.')
+        if (t !== '' && !/^\d*\.?\d*$/.test(t)) return
+        setText(t)
+        const n = numOrNull(t)
+        if (n !== (value ?? null)) onValue(n)
+      }}
+    />
+  )
+}
 
 function fmtRir(n: number | undefined) {
   if (n == null) return ''
@@ -194,9 +221,21 @@ export default function Workout() {
           <div className="progress-line">
             <div style={{ width: `${pct * 100}%` }} />
           </div>
-          {!isDone && day?.warmup && <div className="footnote" style={{ marginTop: 8 }}>Warm-up: {day.warmup}</div>}
           {isDone && <div className="banner" style={{ background: 'color-mix(in srgb, var(--nutri) 14%, var(--card))' }}>Workout complete. Tap Edit to change any set.</div>}
         </div>
+
+        {!isDone && day && (
+          <WarmupCard
+            day={day}
+            done={s.warmupDone}
+            collapsed={s.exercises.some((e) => e.sets.some((x) => x.done))}
+            onToggle={(i) => mutate((d) => {
+              const cur = d.warmupDone ?? []
+              d.warmupDone = cur.includes(i) ? cur.filter((x) => x !== i) : [...cur, i]
+            })}
+            style={{ marginTop: 8 }}
+          />
+        )}
 
         {s.cardio && <CardioCard s={s} save={save} disabled={isDone} note={day?.cardio} />}
 
@@ -355,35 +394,35 @@ function ExerciseCard({
           <div key={si} className={`set-row num${set.done ? ' done' : ''}`}>
             <div className={`set-num${set.type === 'W' ? ' w' : ''}`}>{label}</div>
             <div className="set-prev">{prev}</div>
-            <input
+            <NumInput
               className="set-input"
               inputMode="decimal"
               aria-label={`Set ${label} weight`}
               placeholder={set.suggestWeight != null ? String(set.suggestWeight) : '–'}
-              value={set.weight ?? ''}
+              value={set.weight}
               disabled={disabled}
-              onChange={(e) => onSet(si, { weight: numOrNull(e.target.value) })}
+              onValue={(n) => onSet(si, { weight: n })}
               onFocus={(e) => e.target.select()}
             />
-            <input
+            <NumInput
               className="set-input"
               inputMode="numeric"
               aria-label={`Set ${label} reps`}
               placeholder={repPh}
-              value={set.reps ?? ''}
+              value={set.reps}
               disabled={disabled}
-              onChange={(e) => onSet(si, { reps: numOrNull(e.target.value) })}
+              onValue={(n) => onSet(si, { reps: n })}
               onFocus={(e) => e.target.select()}
             />
             {set.type === 'N' ? (
-              <input
+              <NumInput
                 className="set-input rir"
                 inputMode="decimal"
                 aria-label={`Set ${label} RIR`}
                 placeholder={fmtRir(ex.targetRir)}
-                value={set.rir ?? ''}
+                value={set.rir}
                 disabled={disabled}
-                onChange={(e) => onSet(si, { rir: numOrNull(e.target.value) })}
+                onValue={(n) => onSet(si, { rir: n })}
                 onFocus={(e) => e.target.select()}
               />
             ) : (
@@ -448,9 +487,9 @@ function CardioCard({
         <span />
       </div>
       <div className={`set-row num${c.done ? ' done' : ''}`} style={{ gridTemplateColumns: '1fr 1fr 1fr 44px' }}>
-        <input className="set-input" inputMode="decimal" placeholder={String(note?.minutes ?? '')} value={c.minutes ?? ''} disabled={disabled} onChange={(e) => set({ minutes: numOrNull(e.target.value) })} />
-        <input className="set-input" inputMode="decimal" placeholder={note?.distanceMiles ? String(note.distanceMiles) : '–'} value={c.distance ?? ''} disabled={disabled} onChange={(e) => set({ distance: numOrNull(e.target.value) })} />
-        <input className="set-input" inputMode="numeric" placeholder="–" value={c.avgHr ?? ''} disabled={disabled} onChange={(e) => set({ avgHr: numOrNull(e.target.value) })} />
+        <NumInput className="set-input" inputMode="decimal" placeholder={String(note?.minutes ?? '')} value={c.minutes} disabled={disabled} onValue={(n) => set({ minutes: n })} />
+        <NumInput className="set-input" inputMode="decimal" placeholder={note?.distanceMiles ? String(note.distanceMiles) : '–'} value={c.distance} disabled={disabled} onValue={(n) => set({ distance: n })} />
+        <NumInput className="set-input" inputMode="numeric" placeholder="–" value={c.avgHr} disabled={disabled} onValue={(n) => set({ avgHr: n })} />
         <button
           className={`check${c.done ? ' on' : ''}`}
           aria-label="Complete cardio"

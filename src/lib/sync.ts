@@ -7,7 +7,7 @@
  * directly, so there is no SDK to load.
  */
 import { useSyncExternalStore } from 'react'
-import { db, remoteDeletes, setLocalChangeListener, SYNC_TABLES, syncKey, type SyncTable } from '../db'
+import { db, remoteDeletes, upgradeDefaultProgram, setLocalChangeListener, SYNC_TABLES, syncKey, type SyncTable } from '../db'
 import { mergeHealthPayloads, type HealthPayload } from './health'
 
 // Fill these in to skip typing the project URL and key on each device.
@@ -341,6 +341,7 @@ export function syncNow(): Promise<void> {
         again = false
         const { token: tok, userId } = await token()
         await pull(tok)
+        await upgradeDefaultProgram()
         await applyCoachTargets()
         await pullHealthInbox(tok).catch((e) => {
           // The Health inbox is optional: an older database setup may not have it.

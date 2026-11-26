@@ -8,6 +8,7 @@ import { addDays, fmtDate, mondayOf, WEEKDAY_LONG, WEEKDAY_SHORT, ymd } from '..
 import { APARTMENT_MAX_DB, applyCoach, bestSet, lastPerformedAt, dayFor, e1rm, exerciseName, programWeek, recentPerformances, sessionStats, suggestNext, weekPlanFor } from '../lib/training'
 import { doneHistory, startWorkout } from '../lib/actions'
 import type { ExercisePrescription, ProgramDay, WorkoutSession } from '../types'
+import { WarmupCard } from '../components/WarmupCard'
 import { TrendPill } from './Workout'
 
 const kindColor: Record<string, string> = {
@@ -201,12 +202,7 @@ export function DayPreview() {
           <h1>{d.name}</h1>
           {d.notes && <div className="footnote" style={{ marginTop: 4 }}>{d.notes}</div>}
         </div>
-        {d.warmup && (
-          <div className="card" style={{ marginTop: 8 }}>
-            <div className="card-head">Warm-up</div>
-            <div className="footnote" style={{ marginTop: 4 }}>{d.warmup}</div>
-          </div>
-        )}
+        <WarmupCard day={d} style={{ marginTop: 8 }} />
         {d.exercises.length > 0 && (
           <Section title="Exercises">
             <div className="list">

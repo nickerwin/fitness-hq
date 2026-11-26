@@ -158,7 +158,7 @@
       "name": "Upper A",
       "weekday": 1,
       "kind": "strength",
-      "warmup": "5 min incline walk (12%, 3.0 mph), then 3-5 min bands for the muscles trained today",
+      "warmup": "5-min routine for bench and rows: open the upper back, wake up the shoulders, then groove the press. Ramp-up sets on the bench follow.",
       "notes": "Bench strength + horizontal pull. ~55 min.",
       "exercises": [
         {
@@ -296,6 +296,43 @@
           "supersetGroup": "A",
           "substitutions": []
         }
+      ],
+      "warmupRoutine": [
+        {
+          "name": "Arm circles",
+          "dose": "10 forward, 10 back",
+          "cue": "Small to big, easy pace"
+        },
+        {
+          "name": "Cat-cow",
+          "dose": "8 slow reps",
+          "cue": "On all fours, move through the whole spine"
+        },
+        {
+          "name": "Thoracic open books",
+          "dose": "6 per side",
+          "cue": "Lying on your side, knees stacked, rotate the top arm open and breathe out"
+        },
+        {
+          "name": "Band pull-aparts",
+          "dose": "15",
+          "cue": "Straight arms, squeeze shoulder blades together, 1 s pause"
+        },
+        {
+          "name": "Band dislocates",
+          "dose": "10",
+          "cue": "Wide grip, slow over the head and back"
+        },
+        {
+          "name": "Scap push-ups",
+          "dose": "12",
+          "cue": "Arms locked, let the chest sink then push the floor away"
+        },
+        {
+          "name": "Push-ups",
+          "dose": "8 easy",
+          "cue": "Stop well short of hard. Hands on a bench if needed"
+        }
       ]
     },
     {
@@ -303,7 +340,7 @@
       "name": "Lower A",
       "weekday": 2,
       "kind": "strength",
-      "warmup": "5 min incline walk (12%, 3.0 mph), then 3-5 min bands for the muscles trained today",
+      "warmup": "5-min routine for squats: open hips and ankles without tiring the legs. No incline walk before lifting. Save any walking for after. Then ramp up on the Smith squat: bar × 10, 95 × 5, 135 × 3, 165 × 2, then work sets.",
       "notes": "Squat strength + quads. ~55 min.",
       "exercises": [
         {
@@ -421,6 +458,38 @@
           "supersetGroup": null,
           "substitutions": []
         }
+      ],
+      "warmupRoutine": [
+        {
+          "name": "90/90 hip switches",
+          "dose": "6 per side",
+          "cue": "Seated, rotate both knees side to side, tall chest"
+        },
+        {
+          "name": "World's greatest stretch",
+          "dose": "3 per side",
+          "cue": "Lunge, elbow to instep, then rotate the arm to the ceiling"
+        },
+        {
+          "name": "Glute bridges",
+          "dose": "12",
+          "cue": "2 s squeeze at the top, ribs down"
+        },
+        {
+          "name": "Leg swings",
+          "dose": "10 front-back + 10 side per leg",
+          "cue": "Hold the rack, relaxed and loose, not kicking hard"
+        },
+        {
+          "name": "Ankle rocks",
+          "dose": "10 per side",
+          "cue": "Half-kneeling, drive the knee over the toes, heel down"
+        },
+        {
+          "name": "Bodyweight prying squat",
+          "dose": "8 slow",
+          "cue": "Sit to the bottom, hold 2 s, elbows push knees out. A light dumbbell as goblet is fine"
+        }
       ]
     },
     {
@@ -445,7 +514,7 @@
       "name": "Upper B",
       "weekday": 4,
       "kind": "strength",
-      "warmup": "5 min incline walk (12%, 3.0 mph), then 3-5 min bands for the muscles trained today",
+      "warmup": "5-min routine for overhead pressing and pulldowns: shoulder blades up and back, overhead reach, then hang. Ramp-up sets on the shoulder press follow.",
       "notes": "Shoulders, vertical pull, arms. ~55 min.",
       "exercises": [
         {
@@ -578,6 +647,43 @@
           "supersetGroup": "A",
           "substitutions": []
         }
+      ],
+      "warmupRoutine": [
+        {
+          "name": "Arm circles",
+          "dose": "10 forward, 10 back",
+          "cue": "Small to big"
+        },
+        {
+          "name": "Wall slides",
+          "dose": "10",
+          "cue": "Back and forearms on the wall, slide up into a Y without arching"
+        },
+        {
+          "name": "Half-kneeling thoracic rotations",
+          "dose": "6 per side",
+          "cue": "Hand behind head, rotate the elbow up toward the ceiling"
+        },
+        {
+          "name": "Band pull-aparts",
+          "dose": "15",
+          "cue": "Palms up this time, 1 s squeeze"
+        },
+        {
+          "name": "Prone Y-T-W",
+          "dose": "5 each",
+          "cue": "Face down on a bench or floor, thumbs up, no weight"
+        },
+        {
+          "name": "Band external rotation",
+          "dose": "12 per side",
+          "cue": "Elbow at your side, rotate out slowly"
+        },
+        {
+          "name": "Dead hang + scap pulls",
+          "dose": "20 s hang, then 6 scap pulls",
+          "cue": "Relax into the hang, then pull shoulders down without bending the arms"
+        }
       ]
     },
     {
@@ -585,7 +691,7 @@
       "name": "Lower B",
       "weekday": 5,
       "kind": "strength",
-      "warmup": "5 min incline walk (12%, 3.0 mph), then 3-5 min bands for the muscles trained today",
+      "warmup": "5-min routine for RDLs and split squats: groove the hinge, wake up the glutes and hamstrings, and loosen the hips. No leg-tiring cardio first. Then ramp up on the Smith RDL.",
       "notes": "Hinge, glutes, hamstrings. ~55 min.",
       "exercises": [
         {
@@ -704,6 +810,43 @@
           "supersetGroup": null,
           "substitutions": []
         }
+      ],
+      "warmupRoutine": [
+        {
+          "name": "Cat-cow",
+          "dose": "8 slow reps",
+          "cue": "Find a neutral back before you hinge"
+        },
+        {
+          "name": "90/90 hip switches",
+          "dose": "6 per side",
+          "cue": "Tall chest, rotate knees side to side"
+        },
+        {
+          "name": "Glute bridges",
+          "dose": "12",
+          "cue": "2 s squeeze at the top"
+        },
+        {
+          "name": "Bodyweight good mornings",
+          "dose": "10",
+          "cue": "Hands on hips, push hips back until you feel the hamstrings, flat back"
+        },
+        {
+          "name": "Leg swings",
+          "dose": "10 front-back per leg",
+          "cue": "Loose and relaxed"
+        },
+        {
+          "name": "Split squats, bodyweight",
+          "dose": "5 per side",
+          "cue": "Slow down, light touch of the back knee, hand on the rack for balance"
+        },
+        {
+          "name": "Hamstring floss",
+          "dose": "8 per side",
+          "cue": "Lying on your back, leg up, bend and straighten the knee"
+        }
       ]
     },
     {
@@ -730,5 +873,6 @@
       "notes": "Dog walk, nothing structured.",
       "exercises": []
     }
-  ]
+  ],
+  "revision": 2
 }
