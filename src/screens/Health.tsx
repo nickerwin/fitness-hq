@@ -118,6 +118,9 @@ export default function Health() {
                     </div>
                   </div>
                 ))}
+                <a className="btn" style={{ marginTop: 14, display: 'block', textAlign: 'center' }} href={`shortcuts://run-shortcut?name=${encodeURIComponent('Send to Fitness HQ')}`}>
+                  Send Health Now
+                </a>
                 <button className="btn secondary" style={{ marginTop: 14 }} disabled={busy} onClick={test}>
                   Test Connection
                 </button>
@@ -144,10 +147,22 @@ export default function Health() {
                     </div>
                   </li>
                   <li>
+                    Now send <b>yesterday's</b> final total too, so a day is never left half counted. Add <b>Adjust Date</b>: Get <b>Start of Day</b> of Current Date (this is <i>Today Start</i>). Add another <b>Adjust Date</b>: Subtract <b>1 day</b> from Today Start (this is <i>Yesterday Start</i>).
+                  </li>
+                  <li>
+                    Add <b>Find Health Samples</b>: Type <b>Steps</b>, filter <b>Start Date is between</b> Yesterday Start and Today Start, <b>Group By Day</b>. Add <b>Format Date</b> on Yesterday Start, Custom <code>yyyy-MM-dd</code>.
+                  </li>
+                  <li>
+                    Long-press the <b>Get Contents of URL</b> action, tap <b>Duplicate</b> and drag the copy to the end. In the copy, set <code>date</code> to the yesterday Formatted Date, <code>steps</code> to the yesterday Steps samples, and clear <code>weight</code>.
+                  </li>
+                  <li>
                     Run it once. It should say <b>Sent to Fitness HQ</b>. Allow access to Health when asked.
                   </li>
                   <li>
-                    In <b>Automation</b>, tap <b>+</b> then <b>Time of Day</b>. Pick <b>11:45 PM</b>, <b>Daily</b>, <b>Run Immediately</b>, and choose the shortcut. If it is set to <b>Run After Confirmation</b> instead, iOS waits for a tap and the run never happens. Running it late means the evening's steps are counted too. Add a second one at <b>9:00 AM</b> if you want the morning weigh-in to show up straight away.
+                    In <b>Automation</b>, tap <b>+</b> then <b>Time of Day</b>. Pick <b>9:00 AM</b>, <b>Daily</b>, <b>Run Immediately</b>, and choose the shortcut. Add the same at <b>1:00 PM</b> and <b>9:00 PM</b>.
+                    <div style={{ marginTop: 6 }}>
+                      iOS hides Health data while the iPhone is locked, so a run that fires while it's in your pocket sends nothing. Running a few times a day, plus the yesterday total, means any run that lands while you're using the phone fills in the full count. You can also tap <b>Send Health Now</b> above whenever you like.
+                    </div>
                   </li>
                 </ol>
                 <p className="footnote" style={{ marginTop: 10 }}>
@@ -181,7 +196,7 @@ export default function Health() {
           {lastReceived && (
             <p className="footnote" style={{ margin: '0 4px 8px' }}>
               Last sent by the Shortcut:{' '}
-              {new Date(lastReceived).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}. Steps only update when it runs, so a day's count stays partial if the late run is skipped.
+              {new Date(lastReceived).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}. Steps only update when it runs while your iPhone is unlocked. Tap Send Health Now if a day looks short.
             </p>
           )}
           <div className="list">
