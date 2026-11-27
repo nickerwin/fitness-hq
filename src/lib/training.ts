@@ -102,14 +102,15 @@ const hasWork = (e: LoggedExercise) => e.sets.some((y) => y.done && y.type === '
 
 /**
  * Completed performances of an exercise, newest first. With a program, deload-week sessions are skipped.
- * `homeOnly` skips Lake House sessions, so capped dumbbell work there never lowers home-gym weights.
+ * `homeOnly` skips Lake House dumbbell work (capped at 60 lb), so it never lowers home-gym weights.
  */
 export function recentPerformances(history: WorkoutSession[], name: string, n: number, program?: Program, homeOnly = false): LoggedExercise[] {
   const out: LoggedExercise[] = []
   for (const s of history) {
     if (program && s.week != null && weekPlanFor(program, s.week).deload) continue
-    if (homeOnly && s.location === 'lake') continue
     const e = s.exercises.find((x) => x.name === name && hasWork(x))
+    // Dumbbells are capped at the lake house, so that work doesn't set home weights. Barbell work counts everywhere.
+    if (e && homeOnly && s.location === 'lake' && (e.prescription?.equipment ?? 'dumbbell') === 'dumbbell') continue
     if (e) out.push(e)
     if (out.length >= n) break
   }

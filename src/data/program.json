@@ -181,13 +181,11 @@
             "Barbell Bench Press"
           ],
           "lakeHouse": {
-            "name": "Dumbbell Floor Press",
-            "equipment": "dumbbell",
-            "repsMin": 8,
-            "repsMax": 12,
-            "startWeight": 60,
+            "name": "Barbell Bench Press",
+            "equipment": "barbell",
+            "startWeight": 175,
             "startWeightIsEstimate": true,
-            "notes": "Horizontal press, heavy slot. 60s are the cap, so lower for 3 seconds and pause 1 second with elbows on the floor. No bench needed."
+            "notes": "Same slot as Smith bench. Barbell usually runs 5-10% lighter than Smith at first, so treat the first session as a calibration."
           }
         },
         {
@@ -211,12 +209,11 @@
             "Machine Row"
           ],
           "lakeHouse": {
-            "name": "TRX Inverted Row",
-            "equipment": "bodyweight",
-            "startWeight": 0,
-            "repsMin": 8,
-            "repsMax": 12,
-            "notes": "Horizontal pull. Walk your feet forward to make it harder; aim for a body angle where the last 2 reps are hard. Log 0 lb (bodyweight)."
+            "name": "Barbell Bent-Over Row",
+            "equipment": "barbell",
+            "startWeight": 135,
+            "startWeightIsEstimate": true,
+            "notes": "Horizontal pull. Hinge to about 45°, pull to the lower ribs, no body English."
           }
         },
         {
@@ -336,11 +333,11 @@
           "supersetGroup": "A",
           "substitutions": [],
           "lakeHouse": {
-            "name": "Dumbbell Floor Skull Crusher",
+            "name": "Dumbbell Skull Crusher",
             "equipment": "dumbbell",
             "startWeight": 25,
             "startWeightIsEstimate": true,
-            "notes": "Lying on the floor, lower the dumbbells beside your head. Superset with curls."
+            "notes": "Lying on the bench, lower the dumbbells beside your head. Superset with curls."
           }
         }
       ],
@@ -411,13 +408,11 @@
             "Hack Squat"
           ],
           "lakeHouse": {
-            "name": "Dumbbell Front Squat",
-            "equipment": "dumbbell",
-            "repsMin": 8,
-            "repsMax": 12,
-            "startWeight": 60,
+            "name": "Barbell Back Squat",
+            "equipment": "barbell",
+            "startWeight": 185,
             "startWeightIsEstimate": true,
-            "notes": "Main squat. Dumbbells on the shoulders. 60s are the cap, so lower for 3 seconds and pause 1 second at the bottom. Add reps before anything else."
+            "notes": "Squat in the rack with the safeties set just below the bottom position. First session is a calibration; barbell usually starts a bit lighter than Smith."
           }
         },
         {
@@ -507,12 +502,11 @@
             "Standing Calf Raise Machine"
           ],
           "lakeHouse": {
-            "name": "Single-Leg Dumbbell Calf Raise",
-            "equipment": "dumbbell",
-            "perSide": true,
-            "startWeight": 50,
+            "name": "Barbell Standing Calf Raise",
+            "equipment": "barbell",
+            "startWeight": 135,
             "startWeightIsEstimate": true,
-            "notes": "Ball of the foot on the box edge, one dumbbell in the same-side hand. 2-second pause at the bottom stretch."
+            "notes": "Unrack like a squat, balls of the feet on a plate. 2-second pause at the bottom stretch."
           }
         },
         {
@@ -622,7 +616,7 @@
             "Machine Shoulder Press"
           ],
           "lakeHouse": {
-            "notes": "Sit on the plyo box, brace, no arch."
+            "notes": "Seated on the bench, brace, no arch."
           }
         },
         {
@@ -671,12 +665,11 @@
             "Hammer Strength Incline Press"
           ],
           "lakeHouse": {
-            "name": "TRX Chest Press",
-            "equipment": "bodyweight",
-            "startWeight": 0,
-            "repsMin": 10,
-            "repsMax": 12,
-            "notes": "Press slot. Walk your feet back (lower angle) until 12 is hard. Log 0 lb."
+            "name": "Dumbbell Bench Press",
+            "equipment": "dumbbell",
+            "startWeight": 60,
+            "startWeightIsEstimate": true,
+            "notes": "Press slot on the flat bench. 60s are the cap: lower for 3 seconds once you pass 12 reps."
           }
         },
         {
@@ -697,7 +690,7 @@
           "supersetGroup": null,
           "substitutions": [],
           "lakeHouse": {
-            "notes": "Hand on the plyo box. Capped at 60 lb here: pause 1 second at the top and lower for 3 seconds."
+            "notes": "Hand and knee on the bench. Capped at 60 lb here: pause 1 second at the top and lower for 3 seconds."
           }
         },
         {
@@ -772,7 +765,7 @@
             "perSide": false,
             "startWeight": 45,
             "startWeightIsEstimate": true,
-            "notes": "One dumbbell held in both hands, seated on the box. Full stretch at the bottom."
+            "notes": "One dumbbell held in both hands, seated on the bench. Full stretch at the bottom."
           }
         }
       ],
@@ -842,12 +835,11 @@
             "Barbell Romanian Deadlift"
           ],
           "lakeHouse": {
-            "name": "Single-Leg Dumbbell RDL",
-            "equipment": "dumbbell",
-            "perSide": true,
-            "startWeight": 50,
+            "name": "Barbell Romanian Deadlift",
+            "equipment": "barbell",
+            "startWeight": 165,
             "startWeightIsEstimate": true,
-            "notes": "Main hinge. One leg makes 60 lb plenty heavy and keeps the 6-8 range. Dumbbell in the opposite hand; touch the rack for balance if needed."
+            "notes": "Main hinge. Bar close to the legs, soft knees, stop when the hips stop moving back. First session is a calibration."
           }
         },
         {
@@ -868,7 +860,7 @@
           "supersetGroup": null,
           "substitutions": [],
           "lakeHouse": {
-            "notes": "Rear foot on the plyo box."
+            "notes": "Rear foot on the bench."
           }
         },
         {
@@ -892,12 +884,11 @@
             "Barbell Hip Thrust"
           ],
           "lakeHouse": {
-            "name": "Single-Leg Dumbbell Hip Thrust",
-            "equipment": "dumbbell",
-            "perSide": true,
-            "startWeight": 35,
+            "name": "Barbell Hip Thrust",
+            "equipment": "barbell",
+            "startWeight": 165,
             "startWeightIsEstimate": true,
-            "notes": "Upper back on the plyo box, dumbbell on the working hip. 1-second squeeze at the top."
+            "notes": "Upper back on the bench, pad the bar. 1-second squeeze at the top."
           }
         },
         {
@@ -950,7 +941,7 @@
             "equipment": "dumbbell",
             "startWeight": 60,
             "startWeightIsEstimate": true,
-            "notes": "Sit on the box, balls of the feet on a plate or step, dumbbells on the knees. Slow and full range."
+            "notes": "Sit on the bench, balls of the feet on a plate, dumbbells on the knees. Slow and full range."
           }
         },
         {
@@ -1045,13 +1036,16 @@
   "lakeHouse": {
     "maxDumbbell": 60,
     "equipment": [
-      "Dumbbells up to 60 lb",
+      "Barbell and plates",
+      "Bench",
       "Rack with pull-up bar",
+      "Dumbbells up to 60 lb",
       "TRX",
       "Bike",
       "Plyo box",
-      "Slam ball"
+      "Slam ball",
+      "Bands"
     ],
-    "note": "Lake House mode swaps each exercise for one with the same movement pattern using the lake-house gear. Dumbbells stop at 60 lb, so when a lift calls for more, the app keeps 60 and adds reps or a slower tempo. Lake House sessions never lower your home-gym weights."
+    "note": "Lake House mode swaps each exercise for one with the same movement pattern using the lake-house gear. Barbell lifts load as usual. Dumbbells stop at 60 lb, so when a dumbbell lift calls for more, the app keeps 60 and adds reps or a slower tempo. Capped dumbbell work never lowers your home-gym weights."
   }
 }

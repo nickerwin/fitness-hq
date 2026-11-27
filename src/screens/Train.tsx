@@ -46,7 +46,7 @@ export function LocationCard({ program }: { program: Program }) {
       />
       <div className="footnote">
         {lake
-          ? `Workouts use ${program.lakeHouse?.equipment?.join(', ') ?? `dumbbells up to ${max} lb`}. Past ${max} lb the app keeps ${max} and adds reps or a slower tempo. Your home weights stay put.`
+          ? `Workouts use ${program.lakeHouse?.equipment?.join(', ') ?? `dumbbells up to ${max} lb`}. Past ${max} lb the app keeps ${max} and adds reps or a slower tempo. Capped dumbbell work never lowers your home weights.`
           : 'Switch to Lake House when you train there. Each exercise swaps to one with the same movement and rep target.'}
       </div>
     </div>
