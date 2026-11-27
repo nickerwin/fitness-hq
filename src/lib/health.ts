@@ -9,14 +9,23 @@ export interface HealthPayload {
   receivedAt?: string
 }
 
+/** Lines that hold only a count, like "1830", "8,421" or "8421 steps". Dates and times don't match. */
+function countLines(v: unknown): string[] {
+  return String(v)
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => /^\d[\d,]*(\.\d+)?(\s*(steps?|count))?$/i.test(l))
+}
+
 /**
- * True when the Shortcut sent separate Health samples (one number per line) instead of one daily total.
+ * True when the Shortcut sent separate Health samples (one count per line) instead of one daily total.
  * That happens when "Find Health Samples" for Steps isn't set to Group By Day. Adding the samples up
  * would count iPhone and Apple Watch steps twice, and the first one alone is far too low, so neither is used.
+ * A grouped total can come with extra lines such as its date, so only lines that are just a count are counted.
  */
 export function isSampleList(v: unknown): boolean {
   if (v == null || typeof v === 'number') return false
-  return String(v).split(/\r?\n/).filter((l) => /\d/.test(l)).length > 1
+  return countLines(v).length > 1
 }
 
 /** "185.2", "185.2 lb", "84 kg", "8,421" → number (lb for weight). */
@@ -24,7 +33,8 @@ export function parseNum(v: unknown, kind: 'weight' | 'steps'): number | null {
   if (v == null) return null
   if (typeof v === 'number') return isFinite(v) ? v : null
   if (kind === 'steps' && isSampleList(v)) return null
-  const s = String(v).trim().toLowerCase()
+  // Steps: prefer the line that is just the count, so a date line next to it can't be read as the total.
+  const s = (kind === 'steps' ? (countLines(v)[0] ?? String(v)) : String(v)).trim().toLowerCase()
   if (!s) return null
   const m = s.replace(/,/g, '').match(/-?\d+(\.\d+)?/)
   if (!m) return null
