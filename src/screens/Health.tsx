@@ -28,6 +28,8 @@ export default function Health() {
   const cfg = getConfig()
   const [toast, show] = useToast()
   const token = useLiveQuery(async () => ((await db.meta.get('health.token'))?.value as string | undefined) ?? '', [])
+  const stepIssue = useLiveQuery(async () => ((await db.meta.get('health.stepIssue'))?.value as string | undefined) ?? '', [])
+  const lastReceived = useLiveQuery(async () => ((await db.meta.get('health.lastReceived'))?.value as string | undefined) ?? '', [])
   const recent = useLiveQuery(() => db.measurements.orderBy('date').reverse().limit(7).toArray(), []) ?? []
   const [busy, setBusy] = useState(false)
   const handled = useRef('')
@@ -68,6 +70,12 @@ export default function Health() {
         <p className="footnote" style={{ margin: '12px 4px' }}>
           Web apps can't read Apple Health directly, so an iPhone Shortcut reads your weight and steps and sends them here. Set it to run on its own each evening and you never type them again.
         </p>
+
+        {stepIssue && (
+          <div className="card footnote" style={{ fontSize: 14, margin: '0 0 12px' }}>
+            <b>Steps need one setting.</b> On {fmtDate(stepIssue)} the Shortcut sent each Health sample separately instead of the day's total, so those steps weren't logged. In the Shortcut, open the Steps <b>Find Health Samples</b> action, tap <b>Show More</b> and set <b>Group By</b> to <b>Day</b>. That gives one total that matches the Health app, without counting iPhone and Apple Watch twice.
+          </div>
+        )}
 
         <Section title="Automatic (Recommended)">
           {!signedIn ? (
@@ -110,6 +118,9 @@ export default function Health() {
                     </div>
                   </div>
                 ))}
+                <a className="btn" style={{ marginTop: 14, display: 'block', textAlign: 'center' }} href={`shortcuts://run-shortcut?name=${encodeURIComponent('Send to Fitness HQ')}`}>
+                  Send Health Now
+                </a>
                 <button className="btn secondary" style={{ marginTop: 14 }} disabled={busy} onClick={test}>
                   Test Connection
                 </button>
@@ -124,7 +135,7 @@ export default function Health() {
                     Add <b>Find Health Samples</b>. Type <b>Weight</b>, add a filter <b>Start Date is today</b>, sort by <b>Start Date</b>, <b>Latest First</b>, limit <b>1</b>.
                   </li>
                   <li>
-                    Add another <b>Find Health Samples</b>. Type <b>Steps</b>, filter <b>Start Date is today</b>, <b>Group By Day</b>. Grouping makes the total match the Health app.
+                    Add another <b>Find Health Samples</b>. Type <b>Steps</b>, filter <b>Start Date is today</b>. Tap <b>Show More</b> and set <b>Group By</b> to <b>Day</b>. This is the important one: without it the Shortcut sends every separate sample, and the total won't match the Health app.
                   </li>
                   <li>
                     Add <b>Format Date</b>: Current Date, Date Format <b>Custom</b>, <code>yyyy-MM-dd</code>.
@@ -136,10 +147,22 @@ export default function Health() {
                     </div>
                   </li>
                   <li>
+                    Now send <b>yesterday's</b> final total too, so a day is never left half counted. Add <b>Adjust Date</b>: Get <b>Start of Day</b> of Current Date (this is <i>Today Start</i>). Add another <b>Adjust Date</b>: Subtract <b>1 day</b> from Today Start (this is <i>Yesterday Start</i>).
+                  </li>
+                  <li>
+                    Add <b>Find Health Samples</b>: Type <b>Steps</b>, filter <b>Start Date is between</b> Yesterday Start and Today Start, <b>Group By Day</b>. Add <b>Format Date</b> on Yesterday Start, Custom <code>yyyy-MM-dd</code>.
+                  </li>
+                  <li>
+                    Long-press the <b>Get Contents of URL</b> action, tap <b>Duplicate</b> and drag the copy to the end. In the copy, set <code>date</code> to the yesterday Formatted Date, <code>steps</code> to the yesterday Steps samples, and clear <code>weight</code>.
+                  </li>
+                  <li>
                     Run it once. It should say <b>Sent to Fitness HQ</b>. Allow access to Health when asked.
                   </li>
                   <li>
-                    In <b>Automation</b>, tap <b>+</b> then <b>Time of Day</b>. Pick <b>9:00 PM</b>, <b>Daily</b>, <b>Run Immediately</b>, and choose the shortcut. Add a second one at <b>9:00 AM</b> if you want the morning weigh-in to show up straight away.
+                    In <b>Automation</b>, tap <b>+</b> then <b>App</b>. Choose an app you open every day (Messages works well), tick <b>Is Opened</b>, pick <b>Run Immediately</b>, and choose the shortcut.
+                    <div style={{ marginTop: 6 }}>
+                      iOS hides Health data while the iPhone is locked, so a timed run that fires while it's in your pocket sends nothing. Opening an app means the phone is unlocked, so the run always works, and with yesterday's total included, one run a day keeps every day complete. Running it often is fine. You can also tap <b>Send Health Now</b> above.
+                    </div>
                   </li>
                 </ol>
                 <p className="footnote" style={{ marginTop: 10 }}>
@@ -170,6 +193,12 @@ export default function Health() {
         </Section>
 
         <Section title="Last 7 Days">
+          {lastReceived && (
+            <p className="footnote" style={{ margin: '0 4px 8px' }}>
+              Last sent by the Shortcut:{' '}
+              {new Date(lastReceived).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}. Steps only update when it runs while your iPhone is unlocked. Tap Send Health Now if a day looks short.
+            </p>
+          )}
           <div className="list">
             {recent.length === 0 && <div className="list-item footnote">Nothing yet</div>}
             {recent.map((m) => (
