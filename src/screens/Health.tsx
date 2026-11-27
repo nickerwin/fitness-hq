@@ -28,6 +28,7 @@ export default function Health() {
   const cfg = getConfig()
   const [toast, show] = useToast()
   const token = useLiveQuery(async () => ((await db.meta.get('health.token'))?.value as string | undefined) ?? '', [])
+  const stepIssue = useLiveQuery(async () => ((await db.meta.get('health.stepIssue'))?.value as string | undefined) ?? '', [])
   const recent = useLiveQuery(() => db.measurements.orderBy('date').reverse().limit(7).toArray(), []) ?? []
   const [busy, setBusy] = useState(false)
   const handled = useRef('')
@@ -68,6 +69,12 @@ export default function Health() {
         <p className="footnote" style={{ margin: '12px 4px' }}>
           Web apps can't read Apple Health directly, so an iPhone Shortcut reads your weight and steps and sends them here. Set it to run on its own each evening and you never type them again.
         </p>
+
+        {stepIssue && (
+          <div className="card footnote" style={{ fontSize: 14, margin: '0 0 12px' }}>
+            <b>Steps need one setting.</b> On {fmtDate(stepIssue)} the Shortcut sent each Health sample separately instead of the day's total, so those steps weren't logged. In the Shortcut, open the Steps <b>Find Health Samples</b> action, tap <b>Show More</b> and set <b>Group By</b> to <b>Day</b>. That gives one total that matches the Health app, without counting iPhone and Apple Watch twice.
+          </div>
+        )}
 
         <Section title="Automatic (Recommended)">
           {!signedIn ? (
@@ -124,7 +131,7 @@ export default function Health() {
                     Add <b>Find Health Samples</b>. Type <b>Weight</b>, add a filter <b>Start Date is today</b>, sort by <b>Start Date</b>, <b>Latest First</b>, limit <b>1</b>.
                   </li>
                   <li>
-                    Add another <b>Find Health Samples</b>. Type <b>Steps</b>, filter <b>Start Date is today</b>, <b>Group By Day</b>. Grouping makes the total match the Health app.
+                    Add another <b>Find Health Samples</b>. Type <b>Steps</b>, filter <b>Start Date is today</b>. Tap <b>Show More</b> and set <b>Group By</b> to <b>Day</b>. This is the important one: without it the Shortcut sends every separate sample, and the total won't match the Health app.
                   </li>
                   <li>
                     Add <b>Format Date</b>: Current Date, Date Format <b>Custom</b>, <code>yyyy-MM-dd</code>.
@@ -139,7 +146,7 @@ export default function Health() {
                     Run it once. It should say <b>Sent to Fitness HQ</b>. Allow access to Health when asked.
                   </li>
                   <li>
-                    In <b>Automation</b>, tap <b>+</b> then <b>Time of Day</b>. Pick <b>9:00 PM</b>, <b>Daily</b>, <b>Run Immediately</b>, and choose the shortcut. Add a second one at <b>9:00 AM</b> if you want the morning weigh-in to show up straight away.
+                    In <b>Automation</b>, tap <b>+</b> then <b>Time of Day</b>. Pick <b>11:45 PM</b>, <b>Daily</b>, <b>Run Immediately</b>, and choose the shortcut. Running it late means the evening's steps are counted too. Add a second one at <b>9:00 AM</b> if you want the morning weigh-in to show up straight away.
                   </li>
                 </ol>
                 <p className="footnote" style={{ marginTop: 10 }}>

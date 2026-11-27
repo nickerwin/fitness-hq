@@ -9,10 +9,21 @@ export interface HealthPayload {
   receivedAt?: string
 }
 
+/**
+ * True when the Shortcut sent separate Health samples (one number per line) instead of one daily total.
+ * That happens when "Find Health Samples" for Steps isn't set to Group By Day. Adding the samples up
+ * would count iPhone and Apple Watch steps twice, and the first one alone is far too low, so neither is used.
+ */
+export function isSampleList(v: unknown): boolean {
+  if (v == null || typeof v === 'number') return false
+  return String(v).split(/\r?\n/).filter((l) => /\d/.test(l)).length > 1
+}
+
 /** "185.2", "185.2 lb", "84 kg", "8,421" → number (lb for weight). */
 export function parseNum(v: unknown, kind: 'weight' | 'steps'): number | null {
   if (v == null) return null
   if (typeof v === 'number') return isFinite(v) ? v : null
+  if (kind === 'steps' && isSampleList(v)) return null
   const s = String(v).trim().toLowerCase()
   if (!s) return null
   const m = s.replace(/,/g, '').match(/-?\d+(\.\d+)?/)
@@ -65,15 +76,19 @@ export function parseHealthText(text: string): HealthPayload | null {
  */
 export async function mergeHealthPayloads(list: HealthPayload[]): Promise<number> {
   const byDay = new Map<string, { weight?: number; steps?: number }>()
+  let stepIssue: string | null = null
   for (const p of list) {
     const day = parseDay(p.date, p.receivedAt ? ymd(new Date(p.receivedAt)) : ymd())
     const cur = byDay.get(day) ?? {}
     const w = parseNum(p.weight, 'weight')
     const s = parseNum(p.steps, 'steps')
+    if (isSampleList(p.steps)) stepIssue = day
     if (w != null) cur.weight = w
     if (s != null) cur.steps = Math.max(cur.steps ?? 0, s)
     byDay.set(day, cur)
   }
+  if (stepIssue) await db.meta.put({ key: 'health.stepIssue', value: stepIssue })
+  else if (list.some((p) => parseNum(p.steps, 'steps') != null)) await db.meta.delete('health.stepIssue')
   let changed = 0
   for (const [date, v] of byDay) {
     if (v.weight == null && v.steps == null) continue
