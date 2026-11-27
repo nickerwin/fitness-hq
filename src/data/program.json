@@ -234,12 +234,7 @@
           "supersetGroup": null,
           "substitutions": [],
           "lakeHouse": {
-            "name": "Feet-Elevated Push-Up",
-            "equipment": "bodyweight",
-            "startWeight": 0,
-            "repsMin": 10,
-            "repsMax": 15,
-            "notes": "Upper-chest press with feet on the plyo box. 2-second lowering. When you hit 15 on every set, add a 1-second pause at the bottom. Log 0 lb."
+            "notes": "Incline bench at about 30°. Capped at 60 lb here: past 10 reps, lower for 3 seconds."
           }
         },
         {
@@ -735,11 +730,7 @@
           "supersetGroup": "A",
           "substitutions": [],
           "lakeHouse": {
-            "name": "Dumbbell Hammer Curl",
-            "equipment": "dumbbell",
-            "startWeight": 25,
-            "startWeightIsEstimate": true,
-            "notes": "No incline bench, so hammer curls. 3-second lowering."
+            "notes": "Incline bench at about 45°, arms hanging straight down. 3-second lowering."
           }
         },
         {
@@ -1037,7 +1028,7 @@
     "maxDumbbell": 60,
     "equipment": [
       "Barbell and plates",
-      "Bench",
+      "Adjustable bench",
       "Rack with pull-up bar",
       "Dumbbells up to 60 lb",
       "TRX",
