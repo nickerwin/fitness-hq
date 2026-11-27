@@ -159,9 +159,9 @@ export default function Health() {
                     Run it once. It should say <b>Sent to Fitness HQ</b>. Allow access to Health when asked.
                   </li>
                   <li>
-                    In <b>Automation</b>, tap <b>+</b> then <b>Time of Day</b>. Pick <b>9:00 AM</b>, <b>Daily</b>, <b>Run Immediately</b>, and choose the shortcut. Add the same at <b>1:00 PM</b> and <b>9:00 PM</b>.
+                    In <b>Automation</b>, tap <b>+</b> then <b>App</b>. Choose an app you open every day (Messages works well), tick <b>Is Opened</b>, pick <b>Run Immediately</b>, and choose the shortcut.
                     <div style={{ marginTop: 6 }}>
-                      iOS hides Health data while the iPhone is locked, so a run that fires while it's in your pocket sends nothing. Running a few times a day, plus the yesterday total, means any run that lands while you're using the phone fills in the full count. You can also tap <b>Send Health Now</b> above whenever you like.
+                      iOS hides Health data while the iPhone is locked, so a timed run that fires while it's in your pocket sends nothing. Opening an app means the phone is unlocked, so the run always works, and with yesterday's total included, one run a day keeps every day complete. Running it often is fine. You can also tap <b>Send Health Now</b> above.
                     </div>
                   </li>
                 </ol>
