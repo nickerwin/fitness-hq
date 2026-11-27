@@ -88,7 +88,7 @@ def summarize(data, days):
     week = ((today - d(start)).days // 7 + 1) if start else None
     t = settings.get("targets", {})
     lines.append(f"# Fitness HQ snapshot ({today.isoformat()})")
-    lines.append(f"Program: {prog.get('name', '?')} · week {week} (started {start}) · full-gym swaps: {settings.get('useSubstitutes')}")
+    lines.append(f"Program: {prog.get('name', '?')} · week {week} (started {start}) · full-gym swaps: {settings.get('useSubstitutes')} · Lake House mode: {bool(settings.get('lakeHouse'))}")
     lines.append(f"Targets: {t.get('kcal')} kcal, {t.get('protein')} g protein, {t.get('carbs')} g carbs, {t.get('fat')} g fat")
 
     # Body
@@ -112,13 +112,15 @@ def summarize(data, days):
     lines.append(f"\n## Training (last {days} days: {len(sessions)} sessions)")
     for s in sessions:
         done = "coach note ✓" if f"summary:{s.get('uid')}" in coach else "NO coach note yet"
-        lines.append(f"- {s['date']} {s['name']} (wk {s.get('week')}, uid {s.get('uid')}, {done})" + (f" — notes: {s['notes']}" if s.get("notes") else ""))
+        where = ", LAKE HOUSE (DBs capped at 60 lb)" if s.get("location") == "lake" else ""
+        lines.append(f"- {s['date']} {s['name']} (wk {s.get('week')}{where}, uid {s.get('uid')}, {done})" + (f" — notes: {s['notes']}" if s.get("notes") else ""))
         for e in s.get("exercises", []):
             sets = [x for x in e.get("sets", []) if x.get("done") and x.get("type") == "N"]
             if not sets:
                 continue
             desc = ", ".join(f"{x.get('weight')}×{x.get('reps')}" + (f"@{x['rir']}" if x.get("rir") is not None else "") for x in sets)
-            lines.append(f"    {e['name']}: {desc}" + (f"  [target RIR {e.get('targetRir')}]" if e.get("targetRir") is not None else ""))
+            swap = f" (swap for {e['homeName']})" if e.get("homeName") else ""
+            lines.append(f"    {e['name']}{swap}: {desc}" + (f"  [target RIR {e.get('targetRir')}]" if e.get("targetRir") is not None else ""))
         c = s.get("cardio")
         if c and c.get("done"):
             lines.append(f"    Cardio {c.get('modality')}: {c.get('minutes')} min" + (f", {c['distance']} mi" if c.get("distance") else "") + (f", HR {c['avgHr']}" if c.get("avgHr") else ""))

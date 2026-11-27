@@ -169,8 +169,8 @@ export async function ensureSeeded() {
 }
 
 /**
- * When the built-in program gets a new revision, bring the stored copy's warm-ups up to date.
- * Only warm-up fields change, so exercise edits and the coach's changes stay. Runs at start-up and after each sync pull.
+ * When the built-in program gets a new revision, bring the stored copy's warm-ups and Lake House swaps up to date.
+ * Only those fields change, so exercise edits and the coach's changes stay. Runs at start-up and after each sync pull.
  */
 export async function upgradeDefaultProgram() {
   const bundled = defaultProgram as unknown as Program
@@ -180,9 +180,15 @@ export async function upgradeDefaultProgram() {
     if (!p || (p.revision ?? 1) >= target) return
     const days = p.days.map((d) => {
       const b = bundled.days.find((x) => x.key === d.key)
-      return b ? { ...d, warmup: b.warmup, warmupRoutine: b.warmupRoutine } : d
+      if (!b) return d
+      const exercises = d.exercises.map((e) => {
+        const be = b.exercises.find((x) => x.name === e.name)
+        return be?.lakeHouse ? { ...e, lakeHouse: be.lakeHouse } : e
+      })
+      const cardio = d.cardio && b.cardio?.lakeHouse ? { ...d.cardio, lakeHouse: b.cardio.lakeHouse } : d.cardio
+      return { ...d, warmup: b.warmup, warmupRoutine: b.warmupRoutine, exercises, cardio }
     })
-    await db.programs.put({ ...p, days, revision: target })
+    await db.programs.put({ ...p, days, lakeHouse: bundled.lakeHouse, revision: target })
   })
 }
 

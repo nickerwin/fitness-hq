@@ -83,7 +83,7 @@ export default function Summary() {
             </span>
           </Link>
           <div className="mid" style={{ marginTop: 6 }}>{day.name}</div>
-          <div className="footnote" style={{ marginBottom: day.kind === 'rest' ? 0 : 12 }}>{dayLabel(day)}</div>
+          <div className="footnote" style={{ marginBottom: day.kind === 'rest' ? 0 : 12 }}>{dayLabel(day, settings)}{settings.lakeHouse && day.kind !== 'rest' ? ' · Lake House' : ''}</div>
           {day.kind !== 'rest' &&
             (session?.status === 'done' ? (
               <Link to={`/workout/${session.id}`} className="btn secondary">✓ Completed · View</Link>

@@ -32,7 +32,26 @@ export interface ExercisePrescription {
   notes?: string
   supersetGroup?: string | null
   substitutions?: string[]
+  /** Lake House mode: what replaces this exercise there. Missing fields keep the home values. */
+  lakeHouse?: LakeHouseSwap
 }
+
+/** A Lake House swap: same slot and movement pattern, lake-house equipment. */
+export interface LakeHouseSwap {
+  name?: string
+  equipment?: string
+  sets?: number
+  repsMin?: number
+  repsMax?: number
+  restSec?: number
+  startWeight?: number | null
+  startWeightIsEstimate?: boolean
+  perSide?: boolean
+  notes?: string
+}
+
+/** Where a workout happens. Missing means the home gym. */
+export type Location = 'home' | 'lake'
 
 export interface WarmupMove {
   name: string
@@ -59,6 +78,8 @@ export interface ProgramDay {
     hrHigh?: number
     distanceMiles?: number
     notes?: string
+    /** Lake House mode replacements for the modality and notes. */
+    lakeHouse?: { modality?: string; notes?: string }
   }
 }
 
@@ -84,6 +105,8 @@ export interface Program {
   weekPlan?: WeekPlan[]
   steps?: { weeks: [number, number]; dailyTarget: number }[]
   gymSwapNote?: string
+  /** Lake House equipment limits, shown in the app. */
+  lakeHouse?: { maxDumbbell: number; equipment?: string[]; note?: string }
   tracking?: string[]
   nutrition?: { kcal: number; proteinG: number; carbsG: number; fatG: number; adjustmentRule?: string }
   days: ProgramDay[]
@@ -123,7 +146,10 @@ export interface LoggedExercise {
   supersetGroup?: string | null
   targetRir?: number
   notes?: string
+  /** The prescription actually used (the Lake House swap when in Lake House mode). */
   prescription?: ExercisePrescription
+  /** Lake House sessions: the home exercise this one replaced. */
+  homeName?: string
   sets: LoggedSet[]
 }
 
@@ -137,6 +163,8 @@ export interface WorkoutSession extends SyncFields {
   finishedAt?: string
   status: 'active' | 'done'
   week?: number
+  /** 'lake' for Lake House workouts. Missing means the home gym. */
+  location?: Location
   exercises: LoggedExercise[]
   cardio?: { modality: string; minutes: number | null; distance?: number | null; avgHr?: number | null; done: boolean }
   notes?: string
@@ -222,6 +250,8 @@ export interface Settings extends SyncFields {
   /** Monday (YYYY-MM-DD) of program week 1 */
   programStart: string
   useSubstitutes: boolean
+  /** Lake House mode: swap workouts to the lake-house equipment. */
+  lakeHouse?: boolean
 }
 
 // ---------- Weekly check-in ----------
