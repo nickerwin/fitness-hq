@@ -83,10 +83,15 @@ export default function Settings() {
               <label>Use full-gym swaps</label>
               <input type="checkbox" checked={settings.useSubstitutes} onChange={(e) => saveSettings({ useSubstitutes: e.target.checked })} style={{ width: 24, height: 24 }} />
             </div>
+            <div className="field">
+              <label>Lake House mode</label>
+              <input type="checkbox" checked={!!settings.lakeHouse} onChange={(e) => saveSettings({ lakeHouse: e.target.checked })} style={{ width: 24, height: 24 }} />
+            </div>
           </div>
           <p className="footnote" style={{ padding: '6px 4px' }}>
             Week 1 is the week of {fmtDate(settings.programStart, { month: 'long', day: 'numeric' })}. Turn on full-gym swaps after the move: Smith bench becomes barbell bench, and so on. {program?.gymSwapNote}
           </p>
+          <p className="footnote" style={{ padding: '0 4px 6px' }}>{program?.lakeHouse?.note ?? 'Lake House mode swaps workouts to the lake-house equipment.'} You can also switch it on the Train tab.</p>
           <button className="btn secondary" onClick={() => progFile.current?.click()}>
             Import Program File…
           </button>

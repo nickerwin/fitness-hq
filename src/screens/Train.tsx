@@ -1,13 +1,13 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { db } from '../db'
-import { useProgram, useSettings } from '../hooks'
-import { LargeTitle, NavBar, Row, Section } from '../components/ui'
+import { saveSettings, useProgram, useSettings } from '../hooks'
+import { LargeTitle, NavBar, Row, Section, Segmented } from '../components/ui'
 import { LineChart } from '../components/LineChart'
 import { addDays, fmtDate, mondayOf, WEEKDAY_LONG, WEEKDAY_SHORT, ymd } from '../lib/dates'
-import { APARTMENT_MAX_DB, applyCoach, bestSet, lastPerformedAt, dayFor, e1rm, exerciseName, programWeek, recentPerformances, sessionStats, suggestNext, weekPlanFor } from '../lib/training'
+import { bestSet, cardioFor, dayFor, type GymMode, programWeek, resolveExercise, sessionStats, setScore, suggestFor, weekPlanFor } from '../lib/training'
 import { doneHistory, startWorkout } from '../lib/actions'
-import type { ExercisePrescription, ProgramDay, WorkoutSession } from '../types'
+import type { ExercisePrescription, Program, ProgramDay, WorkoutSession } from '../types'
 import { WarmupCard } from '../components/WarmupCard'
 import { TrendPill } from './Workout'
 
@@ -18,10 +18,39 @@ const kindColor: Record<string, string> = {
   rest: 'var(--text-3)',
 }
 
-export function dayLabel(d: ProgramDay) {
+export function dayLabel(d: ProgramDay, mode: GymMode = { useSubstitutes: false }) {
   if (d.kind === 'strength') return `${d.exercises.length} exercises`
-  if (d.cardio) return `${d.cardio.minutes}${d.cardio.minutesMax ? `–${d.cardio.minutesMax}` : ''} min ${d.cardio.modality}`
+  const c = cardioFor(d, mode)
+  if (c) return `${c.minutes}${c.minutesMax ? `–${c.minutesMax}` : ''} min ${c.modality}`
   return d.notes || 'Recovery'
+}
+
+/** Shows a weight; 0 lb on a bodyweight move reads as BW. */
+export const fmtLoad = (w: number | null | undefined, equipment?: string) => (w == null ? '' : w === 0 && equipment === 'bodyweight' ? 'BW' : `${w} lb`)
+
+/** Home gym / Lake House switch. Lake House swaps every workout to the gear there. */
+export function LocationCard({ program }: { program: Program }) {
+  const settings = useSettings()
+  const lake = !!settings.lakeHouse
+  const max = program.lakeHouse?.maxDumbbell ?? 60
+  return (
+    <div className="card" style={{ marginTop: 8 }}>
+      <div className="card-head">Training at</div>
+      <Segmented
+        value={lake ? 'lake' : 'home'}
+        options={[
+          { value: 'home', label: settings.useSubstitutes ? 'Full Gym' : 'Home Gym' },
+          { value: 'lake', label: 'Lake House' },
+        ]}
+        onChange={(v) => saveSettings({ lakeHouse: v === 'lake' })}
+      />
+      <div className="footnote">
+        {lake
+          ? `Workouts use ${program.lakeHouse?.equipment?.join(', ') ?? `dumbbells up to ${max} lb`}. Past ${max} lb the app keeps ${max} and adds reps or a slower tempo. Your home weights stay put.`
+          : 'Switch to Lake House when you train there. Each exercise swaps to one with the same movement and rep target.'}
+      </div>
+    </div>
+  )
 }
 
 export default function Train() {
@@ -72,13 +101,15 @@ export default function Train() {
         </div>
       )}
 
+      <LocationCard program={program} />
+
       {todayDay && todayDay.kind !== 'rest' && (
         <div className="card" style={{ marginTop: 8 }}>
           <div className="card-head" style={{ color: kindColor[todayDay.kind] }}>
             Today · {todayDay.name}
           </div>
           <div className="footnote" style={{ margin: '4px 0 12px' }}>
-            {dayLabel(todayDay)}
+            {dayLabel(todayDay, settings)}
             {todayDay.notes ? ` · ${todayDay.notes}` : ''}
           </div>
           <TodayButton day={todayDay} sessions={weekSessions.filter((s) => s.date === today)} onStart={() => go(todayDay)} />
@@ -105,7 +136,7 @@ export default function Train() {
                     </span>
                   </div>
                   <div className="sub" style={{ marginLeft: 16 }}>
-                    {dayLabel(d)}
+                    {dayLabel(d, settings)}
                   </div>
                 </Row>
               )
@@ -131,7 +162,8 @@ export default function Train() {
         <div className="list">
           {program.days
             .flatMap((d) => d.exercises)
-            .map((ex) => exerciseName(ex, settings.useSubstitutes))
+            .map((ex) => resolveExercise(ex, settings).name)
+            .filter((name, i, all) => all.indexOf(name) === i)
             .map((name) => (
               <Row key={name} to={`/exercise/${encodeURIComponent(name)}`}>
                 {name}
@@ -163,7 +195,10 @@ export function SessionRow({ s }: { s: WorkoutSession }) {
   const mins = s.finishedAt ? Math.round((new Date(s.finishedAt).getTime() - new Date(s.startedAt).getTime()) / 60000) : null
   return (
     <Row to={`/workout/${s.id}`} trail={fmtDate(s.date, { weekday: 'short', month: 'short', day: 'numeric' })}>
-      <div>{s.name}</div>
+      <div>
+        {s.name}
+        {s.location === 'lake' && <span className="pill" style={{ marginLeft: 8 }}>Lake House</span>}
+      </div>
       <div className="sub num">
         {st.setsTotal ? `${st.setsDone} sets · ${st.volume.toLocaleString()} lb` : s.cardio?.minutes ? `${s.cardio.minutes} min` : ''}
         {mins != null ? ` · ${mins} min` : ''}
@@ -184,11 +219,8 @@ export function DayPreview() {
   if (!d) return <NavBar title="Not found" />
   const week = programWeek(settings.programStart, ymd())
   const plan = weekPlanFor(program, week)
-  const sugFor = (ex: ExercisePrescription) => {
-    const name = exerciseName(ex, settings.useSubstitutes)
-    const auto = suggestNext(ex, name, recentPerformances(history ?? [], name, 2, program), plan, { maxDumbbell: settings.useSubstitutes ? undefined : APARTMENT_MAX_DB })
-    return applyCoach(auto, coach?.get(`override:${name}`), lastPerformedAt(history ?? [], name))
-  }
+  const sugFor = (ex: ExercisePrescription) => suggestFor(program, ex, history ?? [], plan, settings, coach)
+  const cardio = cardioFor(d, settings)
   const start = async () => {
     const id = await startWorkout(program, d, ymd(), settings)
     nav(`/workout/${id}`, { replace: true })
@@ -202,28 +234,31 @@ export function DayPreview() {
           <h1>{d.name}</h1>
           {d.notes && <div className="footnote" style={{ marginTop: 4 }}>{d.notes}</div>}
         </div>
+        {d.kind !== 'rest' && <LocationCard program={program} />}
         <WarmupCard day={d} style={{ marginTop: 8 }} />
         {d.exercises.length > 0 && (
           <Section title="Exercises">
             <div className="list">
-              {d.exercises.map((ex) => {
+              {d.exercises.map((home) => {
+                const ex = resolveExercise(home, settings)
                 const sets = Math.max(1, Math.ceil(ex.sets * plan.setsMultiplier))
                 const sug = sugFor(ex)
                 return (
                   <Row
-                    key={ex.name}
-                    to={`/exercise/${encodeURIComponent(exerciseName(ex, settings.useSubstitutes))}`}
+                    key={home.name}
+                    to={`/exercise/${encodeURIComponent(ex.name)}`}
                     trail={
                       <span className="num" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
                         <span>
-                          {sug.weight != null ? `${sug.weight} lb · ` : ''}
-                          {sets} × {ex.repsMin === ex.repsMax ? ex.repsMin : `${ex.repsMin}–${ex.repsMax}`}
+                          {sug.weight != null ? `${fmtLoad(sug.weight, ex.equipment)} · ` : ''}
+                          {sets} × {sug.reps ?? (ex.repsMin === ex.repsMax ? ex.repsMin : `${ex.repsMin}–${ex.repsMax}`)}
                         </span>
                         <TrendPill trend={sug.trend} />
                       </span>
                     }
                   >
-                    <div>{exerciseName(ex, settings.useSubstitutes)}</div>
+                    <div>{ex.name}</div>
+                    {ex.name !== home.name && settings.lakeHouse && <div className="sub">Replaces {home.name}</div>}
                     <div className="sub num">
                       {ex.muscle} · rest {Math.round(ex.restSec / 60 * 10) / 10} min · RIR {ex.compound ? plan.rirCompound : plan.rirIsolation}
                       {ex.supersetGroup ? ` · superset ${ex.supersetGroup}` : ''}
@@ -234,10 +269,10 @@ export function DayPreview() {
             </div>
           </Section>
         )}
-        {d.cardio && (
+        {cardio && (
           <div className="card" style={{ marginTop: 8 }}>
-            <div className="card-head" style={{ textTransform: 'capitalize' }}>{d.cardio.modality}</div>
-            <div className="footnote" style={{ marginTop: 4 }}>{d.cardio.notes}</div>
+            <div className="card-head" style={{ textTransform: 'capitalize' }}>{cardio.modality}</div>
+            <div className="footnote" style={{ marginTop: 4 }}>{cardio.notes}</div>
           </div>
         )}
         {d.kind !== 'rest' && (
@@ -261,13 +296,19 @@ export function ExerciseHistory() {
   const program = useProgram()
   const sessions =
     useLiveQuery(async () => (await db.sessions.where('status').equals('done').sortBy('startedAt')).filter((s) => s.exercises.some((e) => e.name === name)), [name]) ?? []
-  const presc = program?.days.flatMap((d) => d.exercises).find((e) => e.name === name || e.substitutions?.includes(name))
+  const presc = program?.days
+    .flatMap((d) => d.exercises)
+    .map((e) => (e.lakeHouse?.name === name ? resolveExercise(e, { useSubstitutes: false, lakeHouse: true }) : e))
+    .find((e) => e.name === name || e.substitutions?.includes(name))
+  const bw = presc?.equipment === 'bodyweight' && rowsAllBodyweight(sessions, name)
   const rows = sessions
     .map((s) => ({ s, e: s.exercises.find((x) => x.name === name)! }))
     .map((r) => ({ ...r, best: bestSet(r.e) }))
     .filter((r) => r.best)
-  const pts = rows.map((r) => ({ x: r.s.date, y: Math.round(e1rm(r.best!.weight!, r.best!.reps!)) }))
-  const pr = rows.reduce<(typeof rows)[number] | undefined>((a, b) => (!a || e1rm(b.best!.weight!, b.best!.reps!) > e1rm(a.best!.weight!, a.best!.reps!) ? b : a), undefined)
+  // Bodyweight moves trend by best reps; everything else by estimated 1RM.
+  const score = (w: number, r: number) => (bw ? r : setScore(w, r))
+  const pts = rows.map((r) => ({ x: r.s.date, y: Math.round(score(r.best!.weight!, r.best!.reps!)) }))
+  const pr = rows.reduce<(typeof rows)[number] | undefined>((a, b) => (!a || score(b.best!.weight!, b.best!.reps!) > score(a.best!.weight!, a.best!.reps!) ? b : a), undefined)
   return (
     <>
       <NavBar title="" />
@@ -282,15 +323,15 @@ export function ExerciseHistory() {
           )}
         </div>
         <div className="card" style={{ marginTop: 8 }}>
-          <div className="card-head" style={{ color: 'var(--train)' }}>Estimated 1-rep max</div>
+          <div className="card-head" style={{ color: 'var(--train)' }}>{bw ? 'Best set (reps)' : 'Estimated 1-rep max'}</div>
           {pr ? (
             <>
               <div className="big num" style={{ marginTop: 4 }}>
-                {Math.round(e1rm(pr.best!.weight!, pr.best!.reps!))}
-                <small>lb best</small>
+                {Math.round(score(pr.best!.weight!, pr.best!.reps!))}
+                <small>{bw ? 'reps best' : 'lb best'}</small>
               </div>
               <div className="footnote num">
-                {pr.best!.weight} × {pr.best!.reps} on {fmtDate(pr.s.date)}
+                {pr.best!.weight === 0 ? 'BW' : pr.best!.weight} × {pr.best!.reps} on {fmtDate(pr.s.date)}
               </div>
               <div style={{ marginTop: 12 }}>
                 <LineChart points={pts} color="var(--train)" />
@@ -312,12 +353,15 @@ export function ExerciseHistory() {
                   <div className="row">
                     <b style={{ fontSize: 15 }}>{fmtDate(s.date, { weekday: 'short', month: 'short', day: 'numeric' })}</b>
                     <span className="spacer" />
-                    <span className="footnote">{s.week ? `Week ${s.week}` : ''}</span>
+                    <span className="footnote">
+                      {s.location === 'lake' ? 'Lake House · ' : ''}
+                      {s.week ? `Week ${s.week}` : ''}
+                    </span>
                   </div>
                   <div className="num" style={{ fontSize: 15, marginTop: 4, color: 'var(--text-2)' }}>
                     {e.sets
                       .filter((x) => x.done && x.type === 'N')
-                      .map((x) => `${x.weight}×${x.reps}${x.rir != null ? ` @${x.rir}` : ''}`)
+                      .map((x) => `${x.weight === 0 ? 'BW' : x.weight}×${x.reps}${x.rir != null ? ` @${x.rir}` : ''}`)
                       .join('   ')}
                   </div>
                 </Link>
@@ -328,4 +372,8 @@ export function ExerciseHistory() {
       </div>
     </>
   )
+}
+
+function rowsAllBodyweight(sessions: WorkoutSession[], name: string) {
+  return sessions.every((s) => s.exercises.filter((e) => e.name === name).every((e) => e.sets.every((x) => !x.done || !x.weight)))
 }

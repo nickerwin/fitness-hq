@@ -8,7 +8,7 @@ import { CoachCard } from '../components/CoachCard'
 import { WarmupCard } from '../components/WarmupCard'
 import { IconCheck, IconClock } from '../components/icons'
 import { fmtDate, fmtDuration } from '../lib/dates'
-import { nextTimePlan, sessionStats, type Suggestion } from '../lib/training'
+import { cardioFor, nextTimePlan, sessionStats, type Suggestion } from '../lib/training'
 import { doneHistory } from '../lib/actions'
 import { useProgram, useSettings } from '../hooks'
 
@@ -176,7 +176,7 @@ export default function Workout() {
     nav('/train', { replace: true })
   }
 
-  const next = program && history && stats.setsDone > 0 ? nextTimePlan(program, s, history, settings.useSubstitutes) : []
+  const next = program && history && stats.setsDone > 0 ? nextTimePlan(program, s, history, settings) : []
   const pct = stats.setsTotal ? stats.setsDone / stats.setsTotal : s.cardio?.done ? 1 : 0
 
   return (
@@ -201,6 +201,7 @@ export default function Workout() {
           <div className="eyebrow">
             {s.programName}
             {s.week ? ` · Week ${s.week}` : ''}
+            {s.location === 'lake' ? ' · Lake House' : ''}
           </div>
           <h1>{s.name}</h1>
           <div className="wo-meta num">
@@ -237,7 +238,7 @@ export default function Workout() {
           />
         )}
 
-        {s.cardio && <CardioCard s={s} save={save} disabled={isDone} note={day?.cardio} />}
+        {s.cardio && <CardioCard s={s} save={save} disabled={isDone} note={day ? cardioFor(day, { useSubstitutes: false, lakeHouse: s.location === 'lake' }) : undefined} />}
 
         {s.exercises.map((ex, ei) => (
           <ExerciseCard
@@ -377,6 +378,7 @@ function ExerciseCard({
           <span>{ex.suggestReason}</span>
         </div>
       )}
+      {ex.homeName && <div className="footnote" style={{ margin: '0 0 6px' }}>Lake House swap for {ex.homeName}</div>}
       {ex.notes && <div className="ex-note">{ex.notes}</div>}
       <div className="sets-head">
         <span style={{ textAlign: 'center' }}>Set</span>
@@ -388,7 +390,7 @@ function ExerciseCard({
       </div>
       {ex.sets.map((set, si) => {
         const label = set.type === 'W' ? 'W' : String(++working)
-        const prev = set.prevWeight != null && set.prevReps != null ? `${set.prevWeight} × ${set.prevReps}` : set.type === 'W' ? 'warm' : '—'
+        const prev = set.prevWeight != null && set.prevReps != null ? `${bwOr(set.prevWeight, p)} × ${set.prevReps}` : set.type === 'W' ? 'warm' : '—'
         const repPh = set.suggestReps != null ? String(set.suggestReps) : set.targetRepsMin != null ? `${set.targetRepsMin}` : ''
         return (
           <div key={si} className={`set-row num${set.done ? ' done' : ''}`}>
@@ -398,7 +400,7 @@ function ExerciseCard({
               className="set-input"
               inputMode="decimal"
               aria-label={`Set ${label} weight`}
-              placeholder={set.suggestWeight != null ? String(set.suggestWeight) : '–'}
+              placeholder={set.suggestWeight != null ? bwOr(set.suggestWeight, p) : '–'}
               value={set.weight}
               disabled={disabled}
               onValue={(n) => onSet(si, { weight: n })}
@@ -516,6 +518,9 @@ export function TrendPill({ trend }: { trend?: string }) {
   return <span className={`pill ${t.cls}`}>{t.label}</span>
 }
 
+/** 0 lb on a bodyweight move shows as BW. */
+const bwOr = (w: number, p?: { equipment?: string }) => (w === 0 && p?.equipment === 'bodyweight' ? 'BW' : String(w))
+
 function NextTime({ items }: { items: (Suggestion & { name: string })[] }) {
   return (
     <div style={{ marginTop: 16 }}>
@@ -530,7 +535,7 @@ function NextTime({ items }: { items: (Suggestion & { name: string })[] }) {
               <div className="sub">{n.reason}</div>
             </div>
             <div className="trail" style={{ flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-              <span className="num" style={{ color: 'var(--text)', fontWeight: 600 }}>{n.weight != null ? `${n.weight} lb` : '—'}</span>
+              <span className="num" style={{ color: 'var(--text)', fontWeight: 600 }}>{n.weight != null ? (n.weight === 0 ? 'BW' : `${n.weight} lb`) + (n.reps ? ` × ${n.reps}` : '') : '—'}</span>
               <TrendPill trend={n.trend} />
             </div>
           </div>

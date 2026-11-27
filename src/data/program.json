@@ -179,7 +179,16 @@
           "supersetGroup": null,
           "substitutions": [
             "Barbell Bench Press"
-          ]
+          ],
+          "lakeHouse": {
+            "name": "Dumbbell Floor Press",
+            "equipment": "dumbbell",
+            "repsMin": 8,
+            "repsMax": 12,
+            "startWeight": 60,
+            "startWeightIsEstimate": true,
+            "notes": "Horizontal press, heavy slot. 60s are the cap, so lower for 3 seconds and pause 1 second with elbows on the floor. No bench needed."
+          }
         },
         {
           "name": "Seated Cable Row",
@@ -200,7 +209,15 @@
           "substitutions": [
             "Chest-Supported T-Bar Row",
             "Machine Row"
-          ]
+          ],
+          "lakeHouse": {
+            "name": "TRX Inverted Row",
+            "equipment": "bodyweight",
+            "startWeight": 0,
+            "repsMin": 8,
+            "repsMax": 12,
+            "notes": "Horizontal pull. Walk your feet forward to make it harder; aim for a body angle where the last 2 reps are hard. Log 0 lb (bodyweight)."
+          }
         },
         {
           "name": "Incline Dumbbell Press",
@@ -218,7 +235,15 @@
           "compound": false,
           "notes": "30 degree bench. Weight per dumbbell.",
           "supersetGroup": null,
-          "substitutions": []
+          "substitutions": [],
+          "lakeHouse": {
+            "name": "Feet-Elevated Push-Up",
+            "equipment": "bodyweight",
+            "startWeight": 0,
+            "repsMin": 10,
+            "repsMax": 15,
+            "notes": "Upper-chest press with feet on the plyo box. 2-second lowering. When you hit 15 on every set, add a 1-second pause at the bottom. Log 0 lb."
+          }
         },
         {
           "name": "Lat Pulldown (Wide Grip)",
@@ -236,7 +261,15 @@
           "compound": false,
           "notes": "",
           "supersetGroup": null,
-          "substitutions": []
+          "substitutions": [],
+          "lakeHouse": {
+            "name": "Pull-Up",
+            "equipment": "bodyweight",
+            "startWeight": 0,
+            "repsMin": 6,
+            "repsMax": 10,
+            "notes": "Vertical pull on the rack. If you stall under 6, finish the set with one foot in a TRX strap for assist. Log 0 lb, or the added weight if you hold a dumbbell."
+          }
         },
         {
           "name": "Cable Lateral Raise",
@@ -256,7 +289,14 @@
           "supersetGroup": null,
           "substitutions": [
             "Dumbbell Lateral Raise"
-          ]
+          ],
+          "lakeHouse": {
+            "name": "Dumbbell Lateral Raise",
+            "equipment": "dumbbell",
+            "perSide": false,
+            "startWeight": 15,
+            "notes": "Slight forward lean, lead with the elbows, 2-second lowering."
+          }
         },
         {
           "name": "Dumbbell Curl",
@@ -294,7 +334,14 @@
           "compound": false,
           "notes": "Superset with curl.",
           "supersetGroup": "A",
-          "substitutions": []
+          "substitutions": [],
+          "lakeHouse": {
+            "name": "Dumbbell Floor Skull Crusher",
+            "equipment": "dumbbell",
+            "startWeight": 25,
+            "startWeightIsEstimate": true,
+            "notes": "Lying on the floor, lower the dumbbells beside your head. Superset with curls."
+          }
         }
       ],
       "warmupRoutine": [
@@ -362,7 +409,16 @@
           "substitutions": [
             "Barbell Back Squat",
             "Hack Squat"
-          ]
+          ],
+          "lakeHouse": {
+            "name": "Dumbbell Front Squat",
+            "equipment": "dumbbell",
+            "repsMin": 8,
+            "repsMax": 12,
+            "startWeight": 60,
+            "startWeightIsEstimate": true,
+            "notes": "Main squat. Dumbbells on the shoulders. 60s are the cap, so lower for 3 seconds and pause 1 second at the bottom. Add reps before anything else."
+          }
         },
         {
           "name": "Dumbbell Romanian Deadlift",
@@ -382,7 +438,10 @@
           "supersetGroup": null,
           "substitutions": [
             "Barbell Romanian Deadlift"
-          ]
+          ],
+          "lakeHouse": {
+            "notes": "Capped at 60 lb here: lower for 3 seconds, stop just below the knee, squeeze up."
+          }
         },
         {
           "name": "Leg Press",
@@ -400,7 +459,15 @@
           "compound": false,
           "notes": "",
           "supersetGroup": null,
-          "substitutions": []
+          "substitutions": [],
+          "lakeHouse": {
+            "name": "Dumbbell Box Step-Up",
+            "equipment": "dumbbell",
+            "perSide": true,
+            "startWeight": 40,
+            "startWeightIsEstimate": true,
+            "notes": "Quad-dominant leg work on the plyo box (knee about 90° at the top). Drive through the whole front foot; no push-off from the back leg."
+          }
         },
         {
           "name": "Dumbbell Reverse Lunge",
@@ -438,7 +505,15 @@
           "supersetGroup": null,
           "substitutions": [
             "Standing Calf Raise Machine"
-          ]
+          ],
+          "lakeHouse": {
+            "name": "Single-Leg Dumbbell Calf Raise",
+            "equipment": "dumbbell",
+            "perSide": true,
+            "startWeight": 50,
+            "startWeightIsEstimate": true,
+            "notes": "Ball of the foot on the box edge, one dumbbell in the same-side hand. 2-second pause at the bottom stretch."
+          }
         },
         {
           "name": "Cable Crunch",
@@ -456,7 +531,13 @@
           "compound": false,
           "notes": "",
           "supersetGroup": null,
-          "substitutions": []
+          "substitutions": [],
+          "lakeHouse": {
+            "name": "Slam Ball Slam",
+            "equipment": "slam ball",
+            "startWeight": null,
+            "notes": "Loaded ab flexion: reach tall, then crunch and drive the ball into the floor. Log the ball weight. Progress by reps, then speed."
+          }
         }
       ],
       "warmupRoutine": [
@@ -506,7 +587,11 @@
         "minutesMax": 30,
         "hrLow": 120,
         "hrHigh": 140,
-        "notes": "Zone 2: can talk in full sentences. Weeks 7-11 optional: replace 10 min with 6 rounds of 30 s hard bike / 90 s easy."
+        "notes": "Zone 2: can talk in full sentences. Weeks 7-11 optional: replace 10 min with 6 rounds of 30 s hard bike / 90 s easy.",
+        "lakeHouse": {
+          "modality": "bike",
+          "notes": "Zone 2 on the bike. Weeks 7-11 optional: replace 10 min with 6 rounds of 30 s hard / 90 s easy. Slam ball slams (6 rounds of 20 s) work for intervals too."
+        }
       }
     },
     {
@@ -535,7 +620,10 @@
           "supersetGroup": null,
           "substitutions": [
             "Machine Shoulder Press"
-          ]
+          ],
+          "lakeHouse": {
+            "notes": "Sit on the plyo box, brace, no arch."
+          }
         },
         {
           "name": "Lat Pulldown (Close Neutral Grip)",
@@ -553,7 +641,15 @@
           "compound": true,
           "notes": "",
           "supersetGroup": null,
-          "substitutions": []
+          "substitutions": [],
+          "lakeHouse": {
+            "name": "Chin-Up",
+            "equipment": "bodyweight",
+            "startWeight": 0,
+            "repsMin": 6,
+            "repsMax": 10,
+            "notes": "Vertical pull on the rack, palms facing you. TRX foot assist on the last reps if you stall under 6. Log 0 lb or added weight."
+          }
         },
         {
           "name": "Machine Chest Press",
@@ -573,7 +669,15 @@
           "supersetGroup": null,
           "substitutions": [
             "Hammer Strength Incline Press"
-          ]
+          ],
+          "lakeHouse": {
+            "name": "TRX Chest Press",
+            "equipment": "bodyweight",
+            "startWeight": 0,
+            "repsMin": 10,
+            "repsMax": 12,
+            "notes": "Press slot. Walk your feet back (lower angle) until 12 is hard. Log 0 lb."
+          }
         },
         {
           "name": "One-Arm Dumbbell Row",
@@ -591,7 +695,10 @@
           "compound": false,
           "notes": "Reps per arm.",
           "supersetGroup": null,
-          "substitutions": []
+          "substitutions": [],
+          "lakeHouse": {
+            "notes": "Hand on the plyo box. Capped at 60 lb here: pause 1 second at the top and lower for 3 seconds."
+          }
         },
         {
           "name": "Cable Face Pull",
@@ -609,7 +716,13 @@
           "compound": false,
           "notes": "",
           "supersetGroup": null,
-          "substitutions": []
+          "substitutions": [],
+          "lakeHouse": {
+            "name": "TRX Face Pull",
+            "equipment": "bodyweight",
+            "startWeight": 0,
+            "notes": "Rear delts: pull the handles to your forehead, elbows high, squeeze 1 second. Log 0 lb."
+          }
         },
         {
           "name": "Incline Dumbbell Curl",
@@ -627,7 +740,14 @@
           "compound": false,
           "notes": "Superset with overhead extension.",
           "supersetGroup": "A",
-          "substitutions": []
+          "substitutions": [],
+          "lakeHouse": {
+            "name": "Dumbbell Hammer Curl",
+            "equipment": "dumbbell",
+            "startWeight": 25,
+            "startWeightIsEstimate": true,
+            "notes": "No incline bench, so hammer curls. 3-second lowering."
+          }
         },
         {
           "name": "Overhead Cable Triceps Extension",
@@ -645,7 +765,15 @@
           "compound": false,
           "notes": "Superset with curl.",
           "supersetGroup": "A",
-          "substitutions": []
+          "substitutions": [],
+          "lakeHouse": {
+            "name": "Dumbbell Overhead Triceps Extension",
+            "equipment": "dumbbell",
+            "perSide": false,
+            "startWeight": 45,
+            "startWeightIsEstimate": true,
+            "notes": "One dumbbell held in both hands, seated on the box. Full stretch at the bottom."
+          }
         }
       ],
       "warmupRoutine": [
@@ -712,7 +840,15 @@
           "supersetGroup": null,
           "substitutions": [
             "Barbell Romanian Deadlift"
-          ]
+          ],
+          "lakeHouse": {
+            "name": "Single-Leg Dumbbell RDL",
+            "equipment": "dumbbell",
+            "perSide": true,
+            "startWeight": 50,
+            "startWeightIsEstimate": true,
+            "notes": "Main hinge. One leg makes 60 lb plenty heavy and keeps the 6-8 range. Dumbbell in the opposite hand; touch the rack for balance if needed."
+          }
         },
         {
           "name": "Dumbbell Bulgarian Split Squat",
@@ -730,7 +866,10 @@
           "compound": true,
           "notes": "Reps per leg. Weight per dumbbell.",
           "supersetGroup": null,
-          "substitutions": []
+          "substitutions": [],
+          "lakeHouse": {
+            "notes": "Rear foot on the plyo box."
+          }
         },
         {
           "name": "Smith Machine Hip Thrust",
@@ -751,7 +890,15 @@
           "substitutions": [
             "Hip Thrust Machine",
             "Barbell Hip Thrust"
-          ]
+          ],
+          "lakeHouse": {
+            "name": "Single-Leg Dumbbell Hip Thrust",
+            "equipment": "dumbbell",
+            "perSide": true,
+            "startWeight": 35,
+            "startWeightIsEstimate": true,
+            "notes": "Upper back on the plyo box, dumbbell on the working hip. 1-second squeeze at the top."
+          }
         },
         {
           "name": "Standing Cable Leg Curl",
@@ -772,7 +919,14 @@
           "substitutions": [
             "Seated Leg Curl",
             "Lying Leg Curl"
-          ]
+          ],
+          "lakeHouse": {
+            "name": "TRX Hamstring Curl",
+            "equipment": "bodyweight",
+            "startWeight": 0,
+            "perSide": false,
+            "notes": "Heels in the straps, hips up, curl heels to glutes. When 15 is easy, go single-leg. Log 0 lb."
+          }
         },
         {
           "name": "Leg Press Calf Raise",
@@ -790,7 +944,14 @@
           "compound": false,
           "notes": "",
           "supersetGroup": null,
-          "substitutions": []
+          "substitutions": [],
+          "lakeHouse": {
+            "name": "Seated Dumbbell Calf Raise",
+            "equipment": "dumbbell",
+            "startWeight": 60,
+            "startWeightIsEstimate": true,
+            "notes": "Sit on the box, balls of the feet on a plate or step, dumbbells on the knees. Slow and full range."
+          }
         },
         {
           "name": "Pallof Press",
@@ -808,7 +969,13 @@
           "compound": false,
           "notes": "Reps per side.",
           "supersetGroup": null,
-          "substitutions": []
+          "substitutions": [],
+          "lakeHouse": {
+            "name": "TRX Anti-Rotation Press",
+            "equipment": "bodyweight",
+            "startWeight": 0,
+            "notes": "Stand side-on to the anchor, hold both handles at your chest, press straight out and resist the twist for 2 seconds. Step away to make it harder. Log 0 lb."
+          }
         }
       ],
       "warmupRoutine": [
@@ -874,5 +1041,17 @@
       "exercises": []
     }
   ],
-  "revision": 2
+  "revision": 3,
+  "lakeHouse": {
+    "maxDumbbell": 60,
+    "equipment": [
+      "Dumbbells up to 60 lb",
+      "Rack with pull-up bar",
+      "TRX",
+      "Bike",
+      "Plyo box",
+      "Slam ball"
+    ],
+    "note": "Lake House mode swaps each exercise for one with the same movement pattern using the lake-house gear. Dumbbells stop at 60 lb, so when a lift calls for more, the app keeps 60 and adds reps or a slower tempo. Lake House sessions never lower your home-gym weights."
+  }
 }

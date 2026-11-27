@@ -29,6 +29,9 @@ Also read the program (`/mnt/project-files/program/program.json`): its progressi
 
   An override applies to the next session of that exercise only:
   `python3 scripts/coach_write.py override --exercise "<exact name>" --weight 185 --reps 5 --note "<short why>"`
+- **Lake House workouts** are marked `LAKE HOUSE` in the pull. Each swapped exercise shows the home lift it replaced. Dumbbells there stop at 60 lb, and TRX, pull-up, push-up and other bodyweight moves log 0 lb (bodyweight) and progress by reps or a harder angle.
+  - Don't read lighter loads or higher reps there as a regression. The app never uses Lake House sessions to set home-gym weights.
+  - Write overrides with the exact Lake House name, such as `--exercise "Dumbbell Front Squat"`. An override above 60 lb on a dumbbell lift gets capped to 60 with extra reps, so give reps or a tempo cue instead.
 - **Calories.** Apply the program's 2-week rule only on an even program week, and only with at least 2 weeks of weekly-average weights:
   `python3 scripts/coach_write.py targets --kcal ... --carbs ... --note "..."`
   Change calories through carbs (4 kcal per gram).
