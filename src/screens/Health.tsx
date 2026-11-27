@@ -29,6 +29,7 @@ export default function Health() {
   const [toast, show] = useToast()
   const token = useLiveQuery(async () => ((await db.meta.get('health.token'))?.value as string | undefined) ?? '', [])
   const stepIssue = useLiveQuery(async () => ((await db.meta.get('health.stepIssue'))?.value as string | undefined) ?? '', [])
+  const lastReceived = useLiveQuery(async () => ((await db.meta.get('health.lastReceived'))?.value as string | undefined) ?? '', [])
   const recent = useLiveQuery(() => db.measurements.orderBy('date').reverse().limit(7).toArray(), []) ?? []
   const [busy, setBusy] = useState(false)
   const handled = useRef('')
@@ -146,7 +147,7 @@ export default function Health() {
                     Run it once. It should say <b>Sent to Fitness HQ</b>. Allow access to Health when asked.
                   </li>
                   <li>
-                    In <b>Automation</b>, tap <b>+</b> then <b>Time of Day</b>. Pick <b>11:45 PM</b>, <b>Daily</b>, <b>Run Immediately</b>, and choose the shortcut. Running it late means the evening's steps are counted too. Add a second one at <b>9:00 AM</b> if you want the morning weigh-in to show up straight away.
+                    In <b>Automation</b>, tap <b>+</b> then <b>Time of Day</b>. Pick <b>11:45 PM</b>, <b>Daily</b>, <b>Run Immediately</b>, and choose the shortcut. If it is set to <b>Run After Confirmation</b> instead, iOS waits for a tap and the run never happens. Running it late means the evening's steps are counted too. Add a second one at <b>9:00 AM</b> if you want the morning weigh-in to show up straight away.
                   </li>
                 </ol>
                 <p className="footnote" style={{ marginTop: 10 }}>
@@ -177,6 +178,12 @@ export default function Health() {
         </Section>
 
         <Section title="Last 7 Days">
+          {lastReceived && (
+            <p className="footnote" style={{ margin: '0 4px 8px' }}>
+              Last sent by the Shortcut:{' '}
+              {new Date(lastReceived).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}. Steps only update when it runs, so a day's count stays partial if the late run is skipped.
+            </p>
+          )}
           <div className="list">
             {recent.length === 0 && <div className="list-item footnote">Nothing yet</div>}
             {recent.map((m) => (

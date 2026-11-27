@@ -87,6 +87,12 @@ export async function mergeHealthPayloads(list: HealthPayload[]): Promise<number
     if (s != null) cur.steps = Math.max(cur.steps ?? 0, s)
     byDay.set(day, cur)
   }
+  // When the Shortcut last reached the app, so a night it didn't run is easy to spot.
+  const last = list.map((p) => p.receivedAt ?? '').sort().pop()
+  if (last) {
+    const prev = (await db.meta.get('health.lastReceived'))?.value as string | undefined
+    if (!prev || last > prev) await db.meta.put({ key: 'health.lastReceived', value: last })
+  }
   if (stepIssue) await db.meta.put({ key: 'health.stepIssue', value: stepIssue })
   else if (list.some((p) => parseNum(p.steps, 'steps') != null)) await db.meta.delete('health.stepIssue')
   let changed = 0
